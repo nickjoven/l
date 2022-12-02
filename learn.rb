@@ -68,3 +68,108 @@ puts valid_anagram("dog", "good")
 puts valid_anagram("iceman", "cinema")
 # => true
 
+# sum_zero
+
+# Write a function called sum_zero that accepts a sorted array
+# of integers. The function should find the first pair where the
+# sum is zero. Return an array that includes both values or
+# false if a pair does not exist
+
+def sum_zero(array)
+  # could compare every number against every number (at least O(n^2))
+  # should ideally do 1 loop (possible using two pointers)
+  left = 0
+  right = array.length - 1
+  while left < right
+    left_val = array[left]
+    right_val = array[right]
+    sum = left_val + right_val
+    return [left_val, right_val] if sum == 0
+    # because the array is sorted, left is the smallest number
+    # right is always the largest number
+    # if the sum is greater than 0, you need the sum to be smaller
+    # so you decrement right, and likewise increment left if the 
+    # sum is less than zero (meaning you need a larger number)
+    sum > 0 ? right -= 1 : left += 1
+  end
+  return false
+end
+
+puts sum_zero([-4, -3, -2, -1, 0, 1, 2, 5])
+
+# => 2, -2
+
+# LC medium that uses the same concept: 167
+
+# Given a 1-indexed array of integers numbers that is already 
+# sorted in non-decreasing order, find two numbers such that they 
+# add up to a specific target number. Let these two numbers be 
+# numbers[index1] and numbers[index2] where 1 <= index1 < index2 
+# <= numbers.length.
+# Return the indices of the two numbers, index1 and index2, added
+# by one as an integer array [index1, index2] of length 2.
+
+# The tests are generated such that there is exactly one solution. 
+# You may not use the same element twice.
+
+# Your solution must use only constant extra space.
+
+def two_sum(numbers, target)
+    # leverage the sorted array with a left pointer and a right pointer
+    left = 0
+    right = numbers.length - 1
+    while left < right
+        sum = numbers[left] + numbers[right]
+        return [left + 1, right + 1] if sum == target
+        sum > target ? right -= 1 : left += 1
+    end
+end
+
+puts two_sum([2,7,11,15], 9)
+
+# count_unique_values
+
+# Implement a function called count_unique_values that accepts
+# a sorted array, and counts the unique values in the array.
+# There can be negative numbers in the array, but it will always
+# be sorted.
+
+# consider using a set - O(n)
+def count_unique_values_one_line(numbers)
+  return numbers.length == 0 ? 0 : set = Set.new(numbers).size
+end
+
+def count_unique_values(numbers)
+    return 0 if numbers.length == 0
+    i = 0
+    j = 1
+    while j < numbers.length
+        if arr[i] != arr[j]
+            i += 1
+            arr[i] = arr[j]
+        end
+        j += 1
+    end 
+    i + 1
+end
+
+puts count_unique_values([1, 2, 3, 4, 4, 5, 6, 6, 6, 7, 7, 8])
+
+# similar problem
+#  Given an array of integers arr, return true if the number of 
+# occurrences of each value in the array is unique or false otherwise.
+
+def unique_occurrences(arr)
+    return arr[0] == arr[1] if arr.length == 2 
+    return true if arr.length == 1
+    hash = Hash.new
+    set = Set.new
+    arr = arr.sort
+    for i in 0..arr.length - 1
+        curr = arr[i]
+        inc = arr[i + 1]
+        hash[curr] ? hash[curr] += 1 : hash[curr] = 1
+        set.add(hash[curr]) unless (inc && curr == inc)
+    end
+    set.size == hash.size
+end
