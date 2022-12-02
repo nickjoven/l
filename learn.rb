@@ -46,17 +46,18 @@ def count_freq_string(string, hash)
     for i in 0..string.length - 1
         hash[string[i]] = (hash[string[i]] || 0) + 1 
     end
+  puts hash
 end
 
-def valid_anagram(string1, string2)
-    # compare appearance + frequency of letters in each string
-    return false if string1.length != string2.length
+def valid_anagram(s, t)
+        # compare appearance + frequency of letters in each string
+    return false if s.length != t.length
     letters1 = Hash.new
     letters2 = Hash.new
-    count_freq_string(string1, letters1)
-    count_freq_string(string2, letters2)
+    count_freq_string(s, letters1)
+    count_freq_string(t, letters2)
     letters1.each do |letter, count_of|
-        return false if count_of != letters2[count_of]
+        return false if count_of != letters2[letter]
     end
     true
 end
