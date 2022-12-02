@@ -39,12 +39,12 @@ puts check_squares([10, 20, 4, 1], [1, 16, 4, 1])
 # anagram of the first string. Basically the exact same as above since a string
 # can be indexed like an array
 
-# helper method needs to be adjusted for strings, though...
+# helper method needs to be adjusted for strings, though... downcase for case insensitivity and do for i in 0..string.length - 1
 
 def count_freq_string(string, hash)
     string = string.downcase
     for i in 0..string.length - 1
-        hash[i] = (hash[i] || 0) + 1 
+        hash[string[i]] = (hash[string[i]] || 0) + 1 
     end
 end
 
