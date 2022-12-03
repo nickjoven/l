@@ -123,6 +123,8 @@ const areThereDuplicatesOneLiner = () => {
     return new Set(arguments).size === arguments.length
 }
 
+
+
 const isSubsequence = (subsequence, string) => {
     // use two pointers
     if (subsequence.length > string.length) return false
@@ -137,3 +139,20 @@ const isSubsequence = (subsequence, string) => {
     return i === subsequence.length
 }
 
+const maxSubarraySum = (nums, n) => {
+    if (n > nums.length) return null
+    let max = 0
+    let i = 0
+    while (i < n) {
+        max += nums[i]
+        i += 1
+    }
+    let temp = max
+    while (i < nums.length) {
+        // sliding window: new temp is old temp - old first element plus new element
+        temp = temp - (nums[i - n]) + (nums[i])
+        max = max > temp ? max : temp
+        i++
+    }
+    return max
+}

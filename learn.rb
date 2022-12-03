@@ -193,7 +193,6 @@ end
 def max_subarray_sum(array, num)
     return nil if num > array.length
     max = 0
-    temp = 0
     i = 0
     while i < num
         max += array[i]
@@ -226,7 +225,7 @@ def max_sub_array(nums)
     while i < nums.length
         num = nums[i]
         temp = num > num + temp ? num : num + temp
-        max = max > temp ? max : temp
+        max = temp > max ? temp : max
         i += 1
     end
     max
