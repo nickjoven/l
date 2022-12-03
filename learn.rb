@@ -245,8 +245,8 @@ def convert_array(num)
   copy = num
   while copy > 0
     digit = copy % 10
-    copy = copy / 10
     result << digit
+    copy = copy / 10
   end
   result
 end
@@ -275,3 +275,14 @@ end
 puts same_frequency(1820, 2081)
 puts same_frequency(183,281)
 
+def find_duplicate(nums)
+    set = Set.new
+    i = 0
+    while i < nums.length 
+        return nums[i] if set === nums[i]
+        set << nums[i]
+        i += 1
+    end
+end
+
+puts find_duplicate([1,3,4,2,2])
