@@ -1,25 +1,26 @@
 # Compare Squares
 
-# Write a function that compares two arrays. The function should return true
-# if every value in the first array has its corresponding value squared in the
-# second array. The frequency of the values must be the same
+# Write a function that compares two arrays. The function should 
+# return true if every value in the first array has its corresponding 
+# value squared in the second array. The frequency of the values must 
+# be the same
 
 # helper method for counting each appearance (establish or increment)
-def count_freq(enumerable, hash)
+def count_freq(enumerable)
+  hash = Hash.new
     for i in enumerable
         hash[i] = (hash[i] || 0) + 1
     end
+  return hash
 end
 
 def check_squares(array1, array2)
     # return if lengths are not equal
     return false if array1.length != array2.length
     # create a hash for each array's count
-    count1 = Hash.new
-    count2 = Hash.new
     # execute helper method
-    count_freq(array1, count1)
-    count_freq(array2, count2)
+    count1 = count_freq(array1)
+    count2 = count_freq(array2)
     # use each enumerator to compare hashes - 
     # return false if there is no key ** 2 with the same value
     count1.each do |key, value|
@@ -35,11 +36,12 @@ puts check_squares([10, 20, 4, 1], [1, 16, 4, 1])
 # => false
 # Anagrams
 
-# Given two strings, write a function to determine if the second string is an
-# anagram of the first string. Basically the exact same as above since a string
-# can be indexed like an array
+# Given two strings, write a function to determine if the second
+# string is an anagram of the first string. Basically the exact 
+# same as above since a string can be indexed like an array
 
-# helper method needs to be adjusted for strings, though... downcase for case insensitivity and do for i in 0..string.length - 1
+# helper method needs to be adjusted for strings, though... downcase
+# for case insensitivity and do for i in 0..string.length - 1
 
 def count_freq_string(string, hash)
     string = string.downcase
@@ -173,3 +175,103 @@ def unique_occurrences(arr)
     end
     set.size == hash.size
 end
+
+# Sliding window
+
+# The pattern involves creating a window chich can either be an
+# array or number from one position to another
+# Depending on a certain condition, the window either increases 
+# or closes (and a new window is created)
+# Useful when tracking a subset of data (like in a string or array)
+
+# Write a function called max_subarray_sum which accepts an array of
+# integers and a number called n. The function should calculate the
+# maximum sum of n consecutive elements in the array
+
+# constantly updating maximum, two loops are used (but not nested)
+
+def max_subarray_sum(array, num)
+    return nil if num > array.length
+    max = 0
+    temp = 0
+    i = 0
+    while i < num
+        max += array[i]
+        i += 1
+    end
+    temp = max
+    while i < array.length
+        # to "shift" the window we subtract the first index of
+        # the previous window (arr[i - num]) and the new end of
+        # window arr[i]
+        temp = temp - (arr[i - num]) + (arr[i])
+        max = max > temp ? max : temp
+        i += 1
+    end
+    return max
+end
+
+puts max_subarray_sum([2, 4, 6, 1, 10, -7])
+
+# similar question, LC 53 - max_sub_array
+
+# Given an integer array nums, find the subarray which has the 
+# largest sum and return its sum.
+
+def max_sub_array(nums)
+    return nums[0] if nums.length == 1
+    max = nums[0]
+    temp = nums[0]
+    i = 1
+    while i < nums.length
+        num = nums[i]
+        temp = num > num + temp ? num : num + temp
+        max = max > temp ? max : temp
+        i += 1
+    end
+    max
+end
+
+puts max_sub_array([-2,1,-3,4,-1,2,1,-5,4])
+
+
+# Write a function called sameFrequency. Given two positive integers, 
+# find out if the two numbers have the same frequency of digits.
+
+# uses two helper functions convert_array and count_freq
+
+def convert_array(num)
+  result = Array.new
+  copy = num
+  while copy > 0
+    digit = copy % 10
+    copy = copy / 10
+    result << digit
+  end
+  result
+end
+
+# def count_freq(enumerable)
+#   hash = Hash.new
+#     for i in enumerable
+#         hash[i] = (hash[i] || 0) + 1
+#     end
+#   return hash
+# end
+
+
+def same_frequency(num1, num2)
+  return true if num1 == num2
+  digits1 = convert_array(num1)
+  digits2 = convert_array(num2)
+  hash1 = count_freq(digits1)
+  hash2 = count_freq(digits2)
+  hash1.each do |k, v|
+    return false if hash1[k] != hash2[k]
+  end
+  return true
+end
+
+puts same_frequency(1820, 2081)
+puts same_frequency(183,281)
+
