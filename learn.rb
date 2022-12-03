@@ -337,3 +337,17 @@ end
 puts(average_pair([1,2,3],2.5)) # true
 puts average_pair([1,3,3,5,6,7,10,12,19],8) # true
 puts average_pair([-1,0,3,4,5,6], 4.1) # false
+
+# LC 50 Pow(x, n)
+
+# done recursively by accounting for 4 possible scenarios for n
+# n == 0
+# n < 0
+# n % 2 == 0 (even)
+# else (odd)
+
+def my_pow(x, n)
+    return 1 if n == 0
+    return 1 / my_pow(x, -n) if n < 0
+    return n % 2 == 0 ? my_pow(x * x, n / 2) : x * my_pow(x, n - 1)
+end
