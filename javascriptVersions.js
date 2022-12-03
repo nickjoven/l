@@ -122,3 +122,18 @@ const areThereDuplicates = () => {
 const areThereDuplicatesOneLiner = () => {
     return new Set(arguments).size === arguments.length
 }
+
+const isSubsequence = (subsequence, string) => {
+    // use two pointers
+    if (subsequence.length > string.length) return false
+    let i = 0
+    let j = 0
+    while (i < subsequence.length && j < string.length) {
+        if (subsequence[i] == string[j]) {
+            i += 1
+        }
+        j += 1
+    }
+    return i === subsequence.length
+}
+
