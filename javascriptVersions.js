@@ -35,6 +35,7 @@ const twoSum = (numbers, target) => {
     }
 }
 
+// works on non sorted array
 const averagePair = (numbers, target) => {
     const hash = {}
     for (let i = 0; i < numbers.length; i++) {
@@ -43,6 +44,25 @@ const averagePair = (numbers, target) => {
             return true
         }
         hash[numbers[i]] = check
+    }
+    return false
+}
+
+// only works on sorted array
+const averagePairPointers = (numbers, target) => {
+    let left = 0
+    let right = numbers.length - 1
+    while (left < right) {
+        const check = (numbers[left] + numbers[right]) / 2
+        if (check === target) {
+            return true
+        }
+        else if (check > target) {
+            right--
+        }
+        else {
+            left++
+        }
     }
     return false
 }

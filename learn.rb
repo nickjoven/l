@@ -307,7 +307,24 @@ puts find_duplicate([1,3,4,2,2])
 # average_pair([-1,0,3,4,5,6], 4.1) # false
 # average_pair([],4) # false
 
+# the array is sorted, therefore two pointers on left
+# and right can be used - binary search is o log n because
+# you don't iterate over every element in the array:
+# you look over half of the array at most, and do a comparison
+# of the left and right elements
+
 def average_pair(numbers, target)
+  left = 0
+  right = numbers.length - 1
+  while left < right
+    check = ((numbers[left] + numbers[right]) / 2.0)
+    return true if check == target.to_f
+    check > target ? right -= 1 : left += 1
+  end
+  return false
+end
+
+def average_pair_hash(numbers, target)
   hash = Hash.new
   numbers.each do |num|
     check = ((target * 2) - num).to_f
