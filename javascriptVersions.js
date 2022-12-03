@@ -35,6 +35,18 @@ const twoSum = (numbers, target) => {
     }
 }
 
+const averagePair = (numbers, target) => {
+    const hash = {}
+    for (let i = 0; i < numbers.length; i++) {
+        const check = ((target * 2) - numbers[i])
+        if (hash[check]) {
+            return true
+        }
+        hash[numbers[i]] = check
+    }
+    return false
+}
+
 const convertArray = (int) => {
     const result = []
     let copy = int
@@ -78,7 +90,6 @@ sameFrequency(22, 222) // false
 
 const areThereDuplicates = () => {
     const hash = {}
-    console.log(arguments)
     for (const [k, v] of Object.entries(arguments)) {
         if (hash[v]) {
             return true
@@ -91,5 +102,3 @@ const areThereDuplicates = () => {
 const areThereDuplicatesOneLiner = () => {
     return new Set(arguments).size === arguments.length
 }
-
-console.log(areThereDuplicates('a', 'b'))

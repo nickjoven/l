@@ -286,3 +286,37 @@ def find_duplicate(nums)
 end
 
 puts find_duplicate([1,3,4,2,2])
+
+# Write a function called average_pair. Given a sorted array of integers and a target average, determine if there is a pair of values in the array where the average of the pair equals the target average. There may be more than one pair that matches the average target.
+
+# Bonus Constraints:
+
+# Time: O(N)
+
+# Space: O(1)
+
+# Sample Input:
+
+# (1 + 2) / 2 = 1.5
+# (1 + x) / 2 = 2.5
+# (1 + x) = (2.5(2)) - 1
+# x = (target * 2) - num
+
+# average_pair([1,2,3],2.5) # true
+# average_pair([1,3,3,5,6,7,10,12,19],8) # true
+# average_pair([-1,0,3,4,5,6], 4.1) # false
+# average_pair([],4) # false
+
+def average_pair(numbers, target)
+  hash = Hash.new
+  numbers.each do |num|
+    check = ((target * 2) - num).to_f
+    return true if hash[check] 
+    hash[num.to_f] = check
+  end
+  return false
+end
+
+puts(average_pair([1,2,3],2.5)) # true
+puts average_pair([1,3,3,5,6,7,10,12,19],8) # true
+puts average_pair([-1,0,3,4,5,6], 4.1) # false
