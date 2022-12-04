@@ -369,3 +369,29 @@ def is_subsequence(sub, string)
 end
 
 puts is_subsequence('hellish', 'hello worldish')
+
+def min_sub_array_len(n, nums)
+    return 0 if nums.length == 0
+    len = Float::INFINITY
+    i = 0
+    j = 0
+    sum = 0
+    while i < nums.length
+        if sum < n && j < nums.length
+            sum += nums[j]
+            j += 1
+            next
+        elsif sum >= n
+            len = len < j - i ? len : j - i
+            sum -= nums[i]
+            i += 1
+            next
+        else 
+            break
+        end
+    end
+    return len == Float::INFINITY ? 0 : len
+end
+
+puts min_sub_array_len(7, [2, 3, 1, 2, 4, 3])
+# => 2

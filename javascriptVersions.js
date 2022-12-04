@@ -156,3 +156,49 @@ const maxSubarraySum = (nums, n) => {
     }
     return max
 }
+
+const minSubArrayLen = (n, nums) => {
+    // takes array of unsorted integers
+    // tries to find smallest subarray whose sum
+    // is greater than n 
+    // returns length of subarray or 0
+    if (nums.length === 0) return 0
+    let len = Infinity
+    let i = j = sum = 0
+    while (i < nums.length) {
+        if (sum < n && j < nums.length) {
+            sum += nums[j]
+            j++
+            continue;
+        } else if (sum >= n) {
+            len = len < j - i ? len : j - i
+            sum -= nums[i]
+            i++
+            continue;
+        } else {
+            break;
+        }
+    }
+    return len === Infinity ? 0 : len
+}
+
+const gt = (a, b) => {
+    return a > b ? a : b
+}
+
+const lengthOfLongestSubstring = (s) => {
+    if (s.length === 0) return 0
+    if (s.length === 1) return 1
+    let h = {}
+    let count = 0
+    let start = 0
+    for (let i = 0; i < s.length; i++) {
+        let cur = s[i]
+        if (h[cur] || h[cur] === 0) {
+            start = gt(start, (h[cur]))
+        }
+        h[cur] = i + 1
+        count = gt(count, (i - start + 1))
+    }
+    return count
+}
