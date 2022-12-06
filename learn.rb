@@ -337,12 +337,10 @@ puts(average_pair([1,2,3],2.5)) # true
 puts average_pair([1,3,3,5,6,7,10,12,19],8) # true
 puts average_pair([-1,0,3,4,5,6], 4.1) # false
 
-<<<<<<< HEAD
 def power(base, exponent)
     return 1 if exponent == 0
     return base * power(base, exponent - 1)
 end
-=======
 # LC 50 Pow(x, n)
 
 # done recursively by accounting for 4 possible scenarios for n
@@ -401,4 +399,3 @@ end
 
 puts min_sub_array_len(7, [2, 3, 1, 2, 4, 3])
 # => 2
->>>>>>> fe05dac23bcd1a8c8d55e4df8f187e3cf32b46a7
