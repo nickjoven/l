@@ -241,14 +241,14 @@ puts max_sub_array([-2,1,-3,4,-1,2,1,-5,4])
 # uses two helper functions convert_array and count_freq
 
 def convert_array(num)
-  result = Array.new
-  copy = num
-  while copy > 0
-    digit = copy % 10
-    result << digit
-    copy = copy / 10
-  end
-  result
+    result = Array.new
+    copy = num
+    while copy > 0
+        digit = copy % 10
+        result << digit
+        copy = copy / 10
+    end
+    result
 end
 
 # def count_freq(enumerable)
@@ -261,15 +261,15 @@ end
 
 
 def same_frequency(num1, num2)
-  return true if num1 == num2
-  digits1 = convert_array(num1)
-  digits2 = convert_array(num2)
-  hash1 = count_freq(digits1)
-  hash2 = count_freq(digits2)
-  hash1.each do |k, v|
-    return false if hash1[k] != hash2[k]
-  end
-  return true
+    return true if num1 == num2
+    digits1 = convert_array(num1)
+    digits2 = convert_array(num2)
+    hash1 = count_freq(digits1)
+    hash2 = count_freq(digits2)
+    hash1.each do |k, v|
+        return false if hash1[k] != hash2[k]
+    end
+    return true
 end
 
 puts same_frequency(1820, 2081)
@@ -314,26 +314,31 @@ puts find_duplicate([1,3,4,2,2])
 # of the left and right elements
 
 def average_pair(numbers, target)
-  left = 0
-  right = numbers.length - 1
-  while left < right
-    check = ((numbers[left] + numbers[right]) / 2.0)
-    return true if check == target.to_f
-    check > target ? right -= 1 : left += 1
-  end
-  return false
+    left = 0
+    right = numbers.length - 1
+    while left < right
+        check = ((numbers[left] + numbers[right]) / 2.0)
+        return true if check == target.to_f
+        check > target ? right -= 1 : left += 1
+    end
+    return false
 end
 
 def average_pair_hash(numbers, target)
-  hash = Hash.new
-  numbers.each do |num|
-    check = ((target * 2) - num).to_f
-    return true if hash[check] 
-    hash[num.to_f] = check
-  end
-  return false
+    hash = Hash.new
+    numbers.each do |num|
+        check = ((target * 2) - num).to_f
+        return true if hash[check] 
+        hash[num.to_f] = check
+    end
+    return false
 end
 
 puts(average_pair([1,2,3],2.5)) # true
 puts average_pair([1,3,3,5,6,7,10,12,19],8) # true
 puts average_pair([-1,0,3,4,5,6], 4.1) # false
+
+def power(base, exponent)
+    return 1 if exponent == 0
+    return base * power(base, exponent - 1)
+end

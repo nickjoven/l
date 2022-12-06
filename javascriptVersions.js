@@ -122,3 +122,8 @@ const areThereDuplicates = () => {
 const areThereDuplicatesOneLiner = () => {
     return new Set(arguments).size === arguments.length
 }
+
+const power = (base, exponent) => {
+    if (exponent === 0) return 1
+    return base * power(base, exponent - 1)
+}
