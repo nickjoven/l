@@ -399,3 +399,8 @@ end
 
 puts min_sub_array_len(7, [2, 3, 1, 2, 4, 3])
 # => 2
+
+def factorial(n)
+    return 1 if n == 0
+    return n * factorial(n - 1)
+end
