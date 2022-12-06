@@ -1,3 +1,5 @@
+require "set"
+
 # Compare Squares
 
 # Write a function that compares two arrays. The function should 
@@ -34,8 +36,8 @@ puts check_squares([1, 2, 4, 1], [1, 16, 4, 1])
 
 puts check_squares([10, 20, 4, 1], [1, 16, 4, 1])
 # => false
-# Anagrams
 
+# Anagrams
 # Given two strings, write a function to determine if the second
 # string is an anagram of the first string. Basically the exact 
 # same as above since a string can be indexed like an array
@@ -71,7 +73,6 @@ puts valid_anagram("iceman", "cinema")
 # => true
 
 # sum_zero
-
 # Write a function called sum_zero that accepts a sorted array
 # of integers. The function should find the first pair where the
 # sum is zero. Return an array that includes both values or
@@ -102,7 +103,6 @@ puts sum_zero([-4, -3, -2, -1, 0, 1, 2, 5])
 # => 2, -2
 
 # LC medium that uses the same concept: 167
-
 # Given a 1-indexed array of integers numbers that is already 
 # sorted in non-decreasing order, find two numbers such that they 
 # add up to a specific target number. Let these two numbers be 
@@ -116,7 +116,7 @@ puts sum_zero([-4, -3, -2, -1, 0, 1, 2, 5])
 
 # Your solution must use only constant extra space.
 
-def two_sum(numbers, target)
+def two_sum_sorted(numbers, target)
     # leverage the sorted array with a left pointer and a right pointer
     left = 0
     right = numbers.length - 1
@@ -127,7 +127,7 @@ def two_sum(numbers, target)
     end
 end
 
-puts two_sum([2,7,11,15], 9)
+puts two_sum_sorted([2,7,11,15], 9)
 
 # count_unique_values
 
@@ -146,9 +146,9 @@ def count_unique_values(numbers)
     i = 0
     j = 1
     while j < numbers.length
-        if arr[i] != arr[j]
+        if numbers[i] != numbers[j]
             i += 1
-            arr[i] = arr[j]
+            numbers[i] = numbers[j]
         end
         j += 1
     end 
@@ -193,7 +193,6 @@ end
 def max_subarray_sum(array, num)
     return nil if num > array.length
     max = 0
-    temp = 0
     i = 0
     while i < num
         max += array[i]
@@ -204,14 +203,14 @@ def max_subarray_sum(array, num)
         # to "shift" the window we subtract the first index of
         # the previous window (arr[i - num]) and the new end of
         # window arr[i]
-        temp = temp - (arr[i - num]) + (arr[i])
+        temp = temp - (array[i - num]) + (array[i])
         max = max > temp ? max : temp
         i += 1
     end
     return max
 end
 
-puts max_subarray_sum([2, 4, 6, 1, 10, -7])
+puts max_subarray_sum([2, 4, 6, 1, 10, -7], 3)
 
 # similar question, LC 53 - max_sub_array
 
@@ -226,7 +225,7 @@ def max_sub_array(nums)
     while i < nums.length
         num = nums[i]
         temp = num > num + temp ? num : num + temp
-        max = max > temp ? max : temp
+        max = temp > max ? temp : max
         i += 1
     end
     max
@@ -338,7 +337,68 @@ puts(average_pair([1,2,3],2.5)) # true
 puts average_pair([1,3,3,5,6,7,10,12,19],8) # true
 puts average_pair([-1,0,3,4,5,6], 4.1) # false
 
+<<<<<<< HEAD
 def power(base, exponent)
     return 1 if exponent == 0
     return base * power(base, exponent - 1)
 end
+=======
+# LC 50 Pow(x, n)
+
+# done recursively by accounting for 4 possible scenarios for n
+# n == 0
+# n < 0
+# n % 2 == 0 (even)
+# else (odd)
+
+def my_pow(x, n)
+    return 1 if n == 0
+    return 1 / my_pow(x, -n) if n < 0
+    return n % 2 == 0 ? my_pow(x * x, n / 2) : x * my_pow(x, n - 1)
+end
+
+# is_subsequence
+def is_subsequence(sub, string)
+  return false if sub.length > string.length
+  i = 0
+  j = 0
+  # j will go through string
+  # i will go through sub
+  # since the method is checking subsequence and not substring,
+  # we can increment i if string[j] == sub[i] and return
+  # i == sub.length
+  while j < string.length && i < sub.length
+    i += 1 if sub[i] == string[j]
+    j += 1
+  end
+  return i == sub.length
+end
+
+puts is_subsequence('hellish', 'hello worldish')
+
+def min_sub_array_len(n, nums)
+    return 0 if nums.length == 0
+    len = Float::INFINITY
+    i = 0
+    j = 0
+    sum = 0
+    while i < nums.length
+        if sum < n && j < nums.length
+            sum += nums[j]
+            j += 1
+            next
+        elsif sum >= n
+            len = len < j - i ? len : j - i
+            sum -= nums[i]
+            i += 1
+            next
+        else 
+            break
+        end
+    end
+    return len == Float::INFINITY ? 0 : len
+end
+
+puts min_sub_array_len(7, [2, 3, 1, 2, 4, 3])
+# => 2
+>>>>>>> fe05dac23bcd1a8c8d55e4df8f187e3cf32b46a7

@@ -127,3 +127,82 @@ const power = (base, exponent) => {
     if (exponent === 0) return 1
     return base * power(base, exponent - 1)
 }
+
+
+const isSubsequence = (subsequence, string) => {
+    // use two pointers
+    if (subsequence.length > string.length) return false
+    let i = 0
+    let j = 0
+    while (i < subsequence.length && j < string.length) {
+        if (subsequence[i] == string[j]) {
+            i += 1
+        }
+        j += 1
+    }
+    return i === subsequence.length
+}
+
+const maxSubarraySum = (nums, n) => {
+    if (n > nums.length) return null
+    let max = 0
+    let i = 0
+    while (i < n) {
+        max += nums[i]
+        i += 1
+    }
+    let temp = max
+    while (i < nums.length) {
+        // sliding window: new temp is old temp - old first element plus new element
+        temp = temp - (nums[i - n]) + (nums[i])
+        max = max > temp ? max : temp
+        i++
+    }
+    return max
+}
+
+const minSubArrayLen = (n, nums) => {
+    // takes array of unsorted integers
+    // tries to find smallest subarray whose sum
+    // is greater than n 
+    // returns length of subarray or 0
+    if (nums.length === 0) return 0
+    let len = Infinity
+    let i = j = sum = 0
+    while (i < nums.length) {
+        if (sum < n && j < nums.length) {
+            sum += nums[j]
+            j++
+            continue;
+        } else if (sum >= n) {
+            len = len < j - i ? len : j - i
+            sum -= nums[i]
+            i++
+            continue;
+        } else {
+            break;
+        }
+    }
+    return len === Infinity ? 0 : len
+}
+
+const gt = (a, b) => {
+    return a > b ? a : b
+}
+
+const lengthOfLongestSubstring = (s) => {
+    if (s.length === 0) return 0
+    if (s.length === 1) return 1
+    let h = {}
+    let count = 0
+    let start = 0
+    for (let i = 0; i < s.length; i++) {
+        let cur = s[i]
+        if (h[cur] || h[cur] === 0) {
+            start = gt(start, (h[cur]))
+        }
+        h[cur] = i + 1
+        count = gt(count, (i - start + 1))
+    }
+    return count
+}
