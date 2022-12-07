@@ -202,3 +202,16 @@ const lengthOfLongestSubstring = (s) => {
     }
     return count
 }
+
+const binarySearch = (array, target) => {
+    let left = 0
+    let right = array.length - 1
+    let middle = Math.floor((left + right) / 2)
+    while (array[middle] !== target && left <= right) {
+        if (target < array[middle]) {
+            right = middle - 1
+        } else left = middle + 1
+        middle = Math.floor((left + right) / 2)
+    }
+    return array[middle] === target ? middle : -1
+}

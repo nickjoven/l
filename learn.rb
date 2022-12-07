@@ -395,3 +395,17 @@ end
 
 puts min_sub_array_len(7, [2, 3, 1, 2, 4, 3])
 # => 2
+
+def search(nums, target)
+    left = 0
+    right = nums.length - 1
+    midpoint = (left + right) / 2
+    while left <= right && nums[midpoint] != target
+        target < nums[midpoint] ? right = midpoint - 1 : left = midpoint + 1
+        midpoint = (left + right) / 2
+    end
+    return nums[midpoint] == target ? midpoint : -1
+end
+
+puts search(nums = [-1,0,3,5,9,12], target = 9)
+# => 4
