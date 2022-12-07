@@ -207,7 +207,6 @@ const lengthOfLongestSubstring = (s) => {
     return count
 }
 
-<<<<<<< HEAD
 const binarySearch = (array, target) => {
     let left = 0
     let right = array.length - 1
@@ -220,9 +219,7 @@ const binarySearch = (array, target) => {
     }
     return array[middle] === target ? middle : -1
 }
-=======
 const factorial = (n) => {
     if (n === 0) return 1
     return n * factorial(n - 1)
 }
->>>>>>> f0d0477cbe0965e5d04edcf53f4314b49f35066f

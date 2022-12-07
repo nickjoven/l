@@ -400,7 +400,6 @@ end
 puts min_sub_array_len(7, [2, 3, 1, 2, 4, 3])
 # => 2
 
-<<<<<<< HEAD
 def search(nums, target)
     left = 0
     right = nums.length - 1
@@ -414,9 +413,8 @@ end
 
 puts search(nums = [-1,0,3,5,9,12], target = 9)
 # => 4
-=======
+
 def factorial(n)
     return 1 if n == 0
     return n * factorial(n - 1)
 end
->>>>>>> f0d0477cbe0965e5d04edcf53f4314b49f35066f
