@@ -418,3 +418,26 @@ def factorial(n)
     return 1 if n == 0
     return n * factorial(n - 1)
 end
+
+def optimized_bubble_sort(array)
+    swapped = nil
+    i = array.length
+    while i > 0
+        swapped = false
+        j = 0
+        while j < i - 1
+            if array[j] > array[j + 1]
+                temp = array[j]
+                array[j] = array[j + 1]
+                array[j + 1] = temp
+                swapped = true
+            end
+            j += 1 
+        end
+        break if swapped == true
+        i -= 1
+    end
+    array
+end
+
+puts optimized_bubble_sort([1, 2, 3, 5, 4, 6, 8, 7])
