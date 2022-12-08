@@ -441,3 +441,20 @@ def optimized_bubble_sort(array)
 end
 
 puts optimized_bubble_sort([1, 2, 3, 5, 4, 6, 8, 7])
+
+def insertion_sort(array)
+    i = 1
+    while i < array.length
+        curr = array[i]
+        j = i - 1
+        while j >= 0 && array[j] > curr
+            array[j + 1] = array[j]
+            j -= 1
+        end
+        array[j + 1] = curr
+        i += 1
+    end
+    array
+end
+
+puts insertion_sort([2, 1, 9, 76, 4])
