@@ -442,6 +442,27 @@ end
 
 puts optimized_bubble_sort([1, 2, 3, 5, 4, 6, 8, 7])
 
+def selection_sort(array)
+    i = 0
+    while i < array.length
+        lowest = i
+        j =  i + 1
+        while j < array.length
+            lowest = j if array[j] < array[lowest]
+            j += 1
+        end
+        if i != lowest
+          temp = array[i]
+          array[i] = array[lowest]
+          array[lowest] = temp
+        end
+        i += 1
+    end
+    array
+end
+
+puts selection_sort([1, 2, 3, 5, 4, 6, 8, 7])
+
 def insertion_sort(array)
     i = 1
     while i < array.length
@@ -458,3 +479,67 @@ def insertion_sort(array)
 end
 
 puts insertion_sort([2, 1, 9, 76, 4])
+
+
+
+
+# LC 21
+# Definition for singly-linked list.
+# class ListNode
+#     attr_accessor :val, :next
+#     def initialize(val = 0, _next = nil)
+#         @val = val
+#         @next = _next
+#     end
+# end
+# @param {ListNode} list1
+# @param {ListNode} list2
+# @return {ListNode}
+def merge_two_lists(list1, list2)
+    list3 = ListNode.new(0)
+    buffer = list3
+    while list1 && list2
+        if list1.val <= list2.val
+            list3.next = list1
+            list1 = list1.next
+        else
+            list3.next = list2
+            list2 = list2.next
+        end
+        list3 = list3.next
+    end
+    list3.next = list1 || list2
+    buffer.next
+end
+
+# LC 83
+# Definition for singly-linked list.
+# class ListNode
+#     attr_accessor :val, :next
+#     def initialize(val = 0, _next = nil)
+#         @val = val
+#         @next = _next
+#     end
+# end
+# @param {ListNode} head
+# @return {ListNode}
+
+def delete_duplicates(head)
+    return head if (!head || !head.next)
+    sentinel = ListNode.new
+    prev = sentinel
+    prev.next = head
+
+    while head && head.next
+        if head.val == head.next.val
+            while head.next && head.val == head.next.val
+                head = head.next
+            end
+            prev.next = head.next
+        else
+            prev = prev.next
+        end
+        head = head.next
+    end
+    sentinel.next
+end
