@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bayesian Belief Network — Epistemic Substrate</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .bayes-node {
+      cursor: pointer;
+    }
+    .bayes-node circle {
+      stroke-width: 3px;
+      transition: filter 0.2s;
+    }
+    .bayes-node.observed circle {
+      stroke: #fff !important;
+      stroke-width: 4px;
+    }
+    .bayes-node .prob-label {
+      font-size: 13px;
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      fill: #fff;
+      pointer-events: none;
+    }
+    .bayes-node .node-label {
+      font-size: 11px;
+      text-anchor: middle;
+      fill: var(--text);
+      pointer-events: none;
+    }
+    .bayes-link {
+      fill: none;
+      stroke: var(--bayes-color);
+      stroke-width: 2;
+      opacity: 0.6;
+      marker-end: url(#bayes-arrow);
+    }
+    .cpt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .cpt-table th, .cpt-table td {
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      text-align: center;
+    }
+    .cpt-table th { background: var(--surface2); color: var(--text-muted); }
+    .prob-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--bayes-color), #f78166);
+      transition: width 0.4s;
+    }
+    .evidence-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+      margin: 2px;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .evidence-btn.active-true  { background: rgba(86,211,100,0.3); border-color: var(--sn-color); color: var(--sn-color); }
+    .evidence-btn.active-false { background: rgba(247,129,102,0.3); border-color: var(--accent3); color: var(--accent3); }
+    .all-probs { margin-top:12px; }
+    .all-probs .prob-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    }
+    .all-probs .prob-row .name { flex: 1; font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .all-probs .prob-row .pct  { width: 36px; font-size: 12px; text-align: right; }
+    .all-probs .bar-wrap { width: 70px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <header class="app-header">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <h1 style="color: var(--bayes-color)">Bayesian Belief Network</h1>
+    <span style="color:var(--text-muted); font-size:12px; margin-left:auto">Probabilistic Graphical Model</span>
+  </header>
+
+  <div class="main-content">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>Evidence</h3>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">
+          Click a node, then set its observed value to True or False to propagate beliefs.
+        </p>
+        <div id="evidence-controls">
+          <p style="font-size:12px;color:var(--text-muted)">Select a node on the graph.</p>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>All Beliefs</h3>
+        <div class="all-probs" id="all-probs"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Actions</h3>
+        <button class="secondary" style="width:100%;margin-bottom:6px" onclick="clearAllEvidence()">Clear All Evidence</button>
+      </div>
+    </aside>
+
+    <div class="canvas-area" id="canvas">
+      <svg id="svg"></svg>
+    </div>
+
+    <aside class="info-panel" id="info-panel">
+      <div id="info-content">
+        <p style="color:var(--text-muted);font-size:13px;margin-top:8px">
+          Click a node to see its CPT (conditional probability table) and set evidence.
+        </p>
+        <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text-muted)">
+          <strong style="color:var(--text)">How to use:</strong><br>
+          1. Click a node to select it<br>
+          2. Set evidence (True/False) in the sidebar<br>
+          3. Watch probabilities update across the network<br>
+          4. Node color intensity = probability
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+let netData = { nodes: [] };
+let nodeMap  = {};
+let beliefs  = {};   // id -> P(true)
+let evidence = {};   // id -> true | false | undefined
+let svg, g, nodeSel, linkSel;
+let selectedNodeId = null;
+
+const tooltip = (() => {
+  const el = document.createElement('div');
+  el.className = 'tooltip';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  return el;
+})();
+
+async function init() {
+  const res = await fetch('../data/bayesian-network.json');
+  netData = await res.json();
+  netData.nodes.forEach(n => { nodeMap[n.id] = n; });
+  runInference();
+  buildGraph();
+  renderAllBeliefs();
+}
+
+// ── Exact inference via full joint enumeration ─────────────────
+// For small networks (≤12 nodes), enumerate all 2^n assignments.
+function runInference() {
+  const ids = netData.nodes.map(n => n.id);
+  const n = ids.length;
+  const totals = {}; // id -> sum of weights where node is true
+  let totalWeight = 0;
+  ids.forEach(id => { totals[id] = 0; });
+
+  for (let mask = 0; mask < (1 << n); mask++) {
+    const assignment = {};
+    ids.forEach((id, i) => { assignment[id] = !!(mask & (1 << i)); });
+
+    // Check consistency with evidence
+    let consistent = true;
+    for (const [eid, eval_] of Object.entries(evidence)) {
+      if (assignment[eid] !== eval_) { consistent = false; break; }
+    }
+    if (!consistent) continue;
+
+    // Compute joint probability
+    let prob = 1.0;
+    for (const node of netData.nodes) {
+      const val = assignment[node.id];
+      let p;
+      if (node.parents.length === 0) {
+        p = node.prior;
+      } else if (node.parents.length === 1) {
+        const pVal = assignment[node.parents[0]];
+        p = node.cpt[pVal ? 'T' : 'F'];
+      } else if (node.parents.length === 2) {
+        const p0 = assignment[node.parents[0]];
+        const p1 = assignment[node.parents[1]];
+        const key = (p0 ? 'T' : 'F') + (p1 ? 'T' : 'F');
+        p = node.cpt[key];
+      } else {
+        p = 0.5; // fallback for >2 parents
+      }
+      prob *= val ? p : (1 - p);
+    }
+
+    totalWeight += prob;
+    ids.forEach((id, i) => {
+      if (assignment[id]) totals[id] += prob;
+    });
+  }
+
+  ids.forEach(id => {
+    beliefs[id] = totalWeight > 0 ? totals[id] / totalWeight : 0.5;
+  });
+}
+
+// ── Graph ──────────────────────────────────────────────────────
+function buildGraph() {
+  const container = document.getElementById('canvas');
+  const W = container.clientWidth || 700;
+  const H = container.clientHeight || 560;
+
+  svg = d3.select('#svg').attr('viewBox', [0, 0, W, H]).style('background', 'var(--bg)');
+
+  const defs = svg.append('defs');
+  defs.append('marker')
+    .attr('id', 'bayes-arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 28).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', 'var(--bayes-color)').attr('opacity', 0.7);
+
+  g = svg.append('g');
+  svg.call(d3.zoom().scaleExtent([0.2, 6]).on('zoom', e => g.attr('transform', e.transform)));
+
+  // Topological layout: place by depth
+  const depths = computeDepths();
+  const levels = {};
+  Object.entries(depths).forEach(([id, d]) => {
+    if (!levels[d]) levels[d] = [];
+    levels[d].push(id);
+  });
+  const maxDepth = Math.max(...Object.keys(levels).map(Number));
+  const yStep = H / (maxDepth + 2);
+
+  netData.nodes.forEach(n => {
+    const d = depths[n.id];
+    const peers = levels[d];
+    const idx = peers.indexOf(n.id);
+    const xStep = W / (peers.length + 1);
+    n.x = xStep * (idx + 1);
+    n.y = yStep * (d + 1);
+    n.fx = n.x; n.fy = n.y;
+  });
+
+  // Build edge list
+  const edges = [];
+  netData.nodes.forEach(n => {
+    n.parents.forEach(pid => {
+      edges.push({ source: nodeMap[pid], target: n });
+    });
+  });
+
+  linkSel = g.append('g').selectAll('line')
+    .data(edges).enter().append('line')
+    .attr('class', 'bayes-link');
+
+  nodeSel = g.append('g').selectAll('g')
+    .data(netData.nodes, d => d.id)
+    .enter().append('g')
+    .attr('class', 'bayes-node')
+    .attr('transform', d => `translate(${d.x},${d.y})`)
+    .on('click', (e, d) => { e.stopPropagation(); selectNode(d.id); })
+    .on('mouseover', (e, d) => showTooltip(e, d))
+    .on('mousemove', e => { tooltip.style.left=(e.clientX+16)+'px'; tooltip.style.top=(e.clientY-10)+'px'; })
+    .on('mouseout', () => tooltip.style.opacity='0');
+
+  nodeSel.append('circle')
+    .attr('r', 30)
+    .attr('stroke', 'var(--bayes-color)')
+    .attr('stroke-width', 3);
+
+  nodeSel.append('text')
+    .attr('class', 'prob-label')
+    .attr('y', 0);
+
+  nodeSel.append('text')
+    .attr('class', 'node-label')
+    .attr('y', 42)
+    .text(d => d.label);
+
+  updateLinks(edges);
+  updateVisuals();
+}
+
+function computeDepths() {
+  const depths = {};
+  netData.nodes.forEach(n => { depths[n.id] = 0; });
+  // iterative longest-path
+  for (let pass = 0; pass < netData.nodes.length; pass++) {
+    netData.nodes.forEach(n => {
+      n.parents.forEach(pid => {
+        if (depths[pid] >= depths[n.id]) {
+          depths[n.id] = depths[pid] + 1;
+        }
+      });
+    });
+  }
+  return depths;
+}
+
+function updateLinks(edges) {
+  if (!linkSel) return;
+  linkSel
+    .attr('x1', d => d.source.x || 0)
+    .attr('y1', d => d.source.y || 0)
+    .attr('x2', d => d.target.x || 0)
+    .attr('y2', d => d.target.y || 0);
+}
+
+function probToColor(p) {
+  // Interpolate from dark grey (p=0) → orange-gold (p=0.5) → blue (p=1)
+  const low  = [30, 30, 35];
+  const mid  = [240, 165,  0];
+  const high = [88, 166, 255];
+  let r, gr, b;
+  if (p < 0.5) {
+    const t = p * 2;
+    r  = low[0] + (mid[0] - low[0]) * t;
+    gr = low[1] + (mid[1] - low[1]) * t;
+    b  = low[2] + (mid[2] - low[2]) * t;
+  } else {
+    const t = (p - 0.5) * 2;
+    r  = mid[0] + (high[0] - mid[0]) * t;
+    gr = mid[1] + (high[1] - mid[1]) * t;
+    b  = mid[2] + (high[2] - mid[2]) * t;
+  }
+  return `rgb(${Math.round(r)},${Math.round(gr)},${Math.round(b)})`;
+}
+
+function updateVisuals() {
+  nodeSel.select('circle')
+    .attr('fill', d => probToColor(beliefs[d.id] || 0))
+    .attr('stroke', d => evidence[d.id] !== undefined ? '#fff' : 'var(--bayes-color)');
+
+  nodeSel.select('.prob-label')
+    .text(d => ((beliefs[d.id] || 0) * 100).toFixed(0) + '%');
+
+  nodeSel.classed('observed', d => evidence[d.id] !== undefined);
+  renderAllBeliefs();
+
+  if (selectedNodeId) renderInfoPanel(nodeMap[selectedNodeId]);
+}
+
+// ── Evidence & Selection ───────────────────────────────────────
+function selectNode(id) {
+  selectedNodeId = id;
+  nodeSel.select('circle')
+    .attr('stroke-width', d => d.id === id ? 5 : 3);
+  renderEvidenceControls(nodeMap[id]);
+  renderInfoPanel(nodeMap[id]);
+}
+
+function renderEvidenceControls(node) {
+  const ev = evidence[node.id];
+  document.getElementById('evidence-controls').innerHTML = `
+    <p style="font-size:12px;font-weight:600;margin-bottom:8px">${node.label}</p>
+    <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px">P(True) = <strong style="color:var(--bayes-color)">${((beliefs[node.id]||0)*100).toFixed(1)}%</strong></p>
+    <div style="display:flex;gap:6px">
+      <button class="evidence-btn ${ev === true ? 'active-true' : ''}" onclick="setEvidence('${node.id}', true)">Observe True</button>
+      <button class="evidence-btn ${ev === false ? 'active-false' : ''}" onclick="setEvidence('${node.id}', false)">Observe False</button>
+      ${ev !== undefined ? `<button class="evidence-btn" onclick="clearEvidence('${node.id}')">Clear</button>` : ''}
+    </div>
+  `;
+}
+
+function setEvidence(id, val) {
+  evidence[id] = val;
+  runInference();
+  updateVisuals();
+  renderEvidenceControls(nodeMap[id]);
+}
+
+function clearEvidence(id) {
+  delete evidence[id];
+  runInference();
+  updateVisuals();
+  renderEvidenceControls(nodeMap[id]);
+}
+
+function clearAllEvidence() {
+  evidence = {};
+  runInference();
+  updateVisuals();
+  document.getElementById('evidence-controls').innerHTML =
+    '<p style="font-size:12px;color:var(--text-muted)">Select a node on the graph.</p>';
+}
+
+function renderAllBeliefs() {
+  const container = document.getElementById('all-probs');
+  container.innerHTML = netData.nodes.map(n => {
+    const p = (beliefs[n.id] || 0);
+    const pct = (p * 100).toFixed(0);
+    const observed = evidence[n.id] !== undefined;
+    return `<div class="prob-row">
+      <span class="name" title="${n.label}">${n.label}${observed ? ' 👁' : ''}</span>
+      <div class="bar-wrap">
+        <div class="prob-bar" style="width:${pct}%;background:${probToColor(p)}"></div>
+      </div>
+      <span class="pct">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function renderInfoPanel(node) {
+  const parents  = node.parents.map(pid => nodeMap[pid]?.label || pid);
+  const children = netData.nodes.filter(n => n.parents.includes(node.id));
+
+  let cptHtml = '';
+  if (node.parents.length === 0) {
+    cptHtml = `<table class="cpt-table"><tr><th>P(True)</th></tr><tr><td style="color:var(--bayes-color)">${node.prior}</td></tr></table>`;
+  } else if (node.parents.length === 1) {
+    cptHtml = `<table class="cpt-table">
+      <tr><th>${parents[0]}</th><th>P(True)</th></tr>
+      <tr><td>True</td><td style="color:var(--bayes-color)">${node.cpt.T}</td></tr>
+      <tr><td>False</td><td style="color:var(--bayes-color)">${node.cpt.F}</td></tr>
+    </table>`;
+  } else if (node.parents.length === 2) {
+    cptHtml = `<table class="cpt-table">
+      <tr><th>${parents[0]}</th><th>${parents[1]}</th><th>P(True)</th></tr>
+      <tr><td>T</td><td>T</td><td style="color:var(--bayes-color)">${node.cpt.TT}</td></tr>
+      <tr><td>T</td><td>F</td><td style="color:var(--bayes-color)">${node.cpt.TF}</td></tr>
+      <tr><td>F</td><td>T</td><td style="color:var(--bayes-color)">${node.cpt.FT}</td></tr>
+      <tr><td>F</td><td>F</td><td style="color:var(--bayes-color)">${node.cpt.FF}</td></tr>
+    </table>`;
+  }
+
+  const ev = evidence[node.id];
+  const evHtml = ev !== undefined
+    ? `<div style="margin-top:8px;padding:8px;background:${ev ? 'rgba(86,211,100,0.1)' : 'rgba(247,129,102,0.1)'};border-radius:6px;font-size:12px;border:1px solid ${ev ? 'var(--sn-color)' : 'var(--accent3)'}">
+         <strong>Observed:</strong> ${ev ? 'True' : 'False'}
+       </div>`
+    : '';
+
+  document.getElementById('info-content').innerHTML = `
+    <h2>${node.label}</h2>
+    <span class="type-badge" style="color:var(--bayes-color);border-color:var(--bayes-color)">P(True) = ${((beliefs[node.id]||0)*100).toFixed(1)}%</span>
+    <p class="definition">${node.description || ''}</p>
+    ${evHtml}
+    ${parents.length ? `<h3>Parents</h3><p style="font-size:12px;color:var(--text-muted)">${parents.join(', ')}</p>` : '<h3>Root Node</h3><p style="font-size:12px;color:var(--text-muted)">No parents (has a prior)</p>'}
+    ${children.length ? `<h3>Children</h3><p style="font-size:12px;color:var(--text-muted)">${children.map(c=>c.label).join(', ')}</p>` : ''}
+    <h3>Conditional Probability Table</h3>
+    ${cptHtml}
+    <div style="margin-top:16px">
+      <button onclick="setEvidence('${node.id}', true)" style="margin-right:6px;font-size:12px;padding:5px 10px;background:rgba(86,211,100,0.3);color:var(--sn-color);border:1px solid var(--sn-color)">Observe True</button>
+      <button onclick="setEvidence('${node.id}', false)" style="font-size:12px;padding:5px 10px;background:rgba(247,129,102,0.3);color:var(--accent3);border:1px solid var(--accent3)">Observe False</button>
+    </div>
+  `;
+}
+
+function showTooltip(event, d) {
+  const p = ((beliefs[d.id]||0)*100).toFixed(1);
+  tooltip.innerHTML = `<h4>${d.label}</h4><p>${(d.description||'').slice(0,100)}…</p><span class="rel-badge" style="color:var(--bayes-color)">P(True) = ${p}%</span>`;
+  tooltip.style.opacity = '1';
+  tooltip.style.left = (event.clientX + 16) + 'px';
+  tooltip.style.top  = (event.clientY - 10) + 'px';
+}
+
+init();
+</script>
+</body>
+</html>

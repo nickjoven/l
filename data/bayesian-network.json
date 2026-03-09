@@ -1,0 +1,92 @@
+{
+  "nodes": [
+    {
+      "id": "reliable_source",
+      "label": "Reliable Source",
+      "description": "The testimony or evidence comes from a historically reliable source.",
+      "parents": [],
+      "prior": 0.6,
+      "cpt": null
+    },
+    {
+      "id": "bias",
+      "label": "Cognitive Bias",
+      "description": "The agent has a relevant cognitive bias (confirmation bias, anchoring, etc.).",
+      "parents": [],
+      "prior": 0.4,
+      "cpt": null
+    },
+    {
+      "id": "evidence_strength",
+      "label": "Strong Evidence",
+      "description": "The available evidence is strong and well-corroborated.",
+      "parents": ["reliable_source"],
+      "prior": null,
+      "cpt": {
+        "T": 0.85,
+        "F": 0.25
+      }
+    },
+    {
+      "id": "justified_belief",
+      "label": "Justified Belief",
+      "description": "The agent has a belief that is epistemically justified.",
+      "parents": ["evidence_strength", "bias"],
+      "prior": null,
+      "cpt": {
+        "TT": 0.3,
+        "TF": 0.85,
+        "FT": 0.05,
+        "FF": 0.2
+      }
+    },
+    {
+      "id": "true_proposition",
+      "label": "True Proposition",
+      "description": "The believed proposition actually corresponds to reality.",
+      "parents": ["reliable_source"],
+      "prior": null,
+      "cpt": {
+        "T": 0.8,
+        "F": 0.35
+      }
+    },
+    {
+      "id": "knowledge",
+      "label": "Knowledge",
+      "description": "The agent has knowledge (justified true belief, assuming no Gettier cases).",
+      "parents": ["justified_belief", "true_proposition"],
+      "prior": null,
+      "cpt": {
+        "TT": 0.95,
+        "TF": 0.0,
+        "FT": 0.0,
+        "FF": 0.0
+      }
+    },
+    {
+      "id": "testimony_shared",
+      "label": "Testimony Shared",
+      "description": "The agent shares their knowledge via testimony to others.",
+      "parents": ["knowledge"],
+      "prior": null,
+      "cpt": {
+        "T": 0.7,
+        "F": 0.1
+      }
+    },
+    {
+      "id": "social_knowledge",
+      "label": "Social Knowledge",
+      "description": "The knowledge propagates into the social/collective epistemic sphere.",
+      "parents": ["testimony_shared", "reliable_source"],
+      "prior": null,
+      "cpt": {
+        "TT": 0.92,
+        "TF": 0.65,
+        "FT": 0.3,
+        "FF": 0.05
+      }
+    }
+  ]
+}

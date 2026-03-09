@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Epistemic Knowledge Substrate — Interactive Formalisms</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .model-card[data-model="kg"]    { --card-accent: var(--kg-color);    }
+    .model-card[data-model="sn"]    { --card-accent: var(--sn-color);    }
+    .model-card[data-model="onto"]  { --card-accent: var(--onto-color);  }
+    .model-card[data-model="bayes"] { --card-accent: var(--bayes-color); }
+
+    .model-card:hover { border-color: var(--card-accent); }
+    .model-card .launch-btn { background: var(--card-accent); }
+    .model-card-body h2 { color: var(--card-accent); }
+
+    .index-layout footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Animated preview SVGs */
+    .preview-svg {
+      width: 100%;
+      height: 100%;
+    }
+    .preview-node { animation: float 3s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-4px); }
+    }
+    .preview-link { opacity: 0.5; }
+
+    /* Tags */
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+<div class="index-layout">
+  <div class="index-hero">
+    <h1>Epistemic Knowledge Substrate</h1>
+    <p>
+      A suite of live, interactable models exploring the foundational formalisms
+      through which knowledge is represented, organized, and reasoned about.
+      All models run entirely in the browser — no backend required.
+    </p>
+  </div>
+
+  <div class="model-grid">
+
+    <!-- Knowledge Graph -->
+    <div class="model-card" data-model="kg">
+      <div class="model-card-preview" style="background:#0a0f1a">
+        <svg class="preview-svg" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+          <!-- edges -->
+          <line x1="140" y1="80" x2="70"  y2="40"  stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+          <line x1="140" y1="80" x2="210" y2="40"  stroke="#d2a8ff" stroke-width="1.5" opacity="0.5"/>
+          <line x1="140" y1="80" x2="60"  y2="130" stroke="#56d364" stroke-width="1.5" opacity="0.5"/>
+          <line x1="140" y1="80" x2="220" y2="130" stroke="#f0a500" stroke-width="1.5" opacity="0.5"/>
+          <line x1="70"  y1="40" x2="210" y2="40"  stroke="#e8c77a" stroke-width="1"   opacity="0.3"/>
+          <!-- nodes -->
+          <circle cx="140" cy="80"  r="18" fill="#58a6ff" opacity="0.9" style="animation:float 2.5s ease-in-out infinite"/>
+          <circle cx="70"  cy="40"  r="13" fill="#d2a8ff" opacity="0.9" style="animation:float 3.1s ease-in-out infinite"/>
+          <circle cx="210" cy="40"  r="13" fill="#56d364" opacity="0.9" style="animation:float 2.8s ease-in-out infinite"/>
+          <circle cx="60"  cy="130" r="11" fill="#f0a500" opacity="0.9" style="animation:float 3.4s ease-in-out infinite"/>
+          <circle cx="220" cy="130" r="11" fill="#f78166" opacity="0.9" style="animation:float 2.2s ease-in-out infinite"/>
+          <!-- labels -->
+          <text x="140" y="80"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="8" pointer-events="none">Knowledge</text>
+          <text x="70"  y="40"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" pointer-events="none">Belief</text>
+          <text x="210" y="40"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" pointer-events="none">Truth</text>
+          <text x="60"  y="130" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" pointer-events="none">Evidence</text>
+          <text x="220" y="130" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" pointer-events="none">Reason</text>
+        </svg>
+      </div>
+      <div class="model-card-body">
+        <div class="formalism">Entity–Relation Graph</div>
+        <h2>Knowledge Graph Explorer</h2>
+        <div class="tag-list">
+          <span class="tag">Force-directed</span>
+          <span class="tag">Add/Remove nodes</span>
+          <span class="tag">Filter</span>
+          <span class="tag">Search</span>
+        </div>
+        <p>
+          Explore 20 epistemic concepts and 30 typed relations in a dynamic
+          force-directed graph. Click nodes to inspect definitions, filter by
+          type, search concepts, and add your own nodes and edges.
+        </p>
+        <a class="launch-btn" href="models/knowledge-graph.html">Launch Explorer →</a>
+      </div>
+    </div>
+
+    <!-- Semantic Network -->
+    <div class="model-card" data-model="sn">
+      <div class="model-card-preview" style="background:#0a1a0a">
+        <svg class="preview-svg" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+          <path d="M90,80 A80,80 0 0,1 190,40"  fill="none" stroke="#58a6ff" stroke-width="1.5" opacity="0.6"/>
+          <path d="M190,40 A80,80 0 0,1 220,120" fill="none" stroke="#56d364" stroke-width="1.5" opacity="0.6"/>
+          <path d="M90,80 A80,80 0 0,1 220,120"  fill="none" stroke="#f78166" stroke-width="1.5" opacity="0.6"/>
+          <path d="M60,130 A90,90 0 0,1 90,80"   fill="none" stroke="#39d0d8" stroke-width="1.5" opacity="0.6"/>
+          <path d="M60,130 A90,90 0 0,1 190,40"  fill="none" stroke="#f0a500" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="90"  cy="80"  r="15" fill="#56d364" opacity="0.85" style="animation:float 2.5s ease-in-out infinite"/>
+          <circle cx="190" cy="40"  r="13" fill="#58a6ff" opacity="0.85" style="animation:float 3.2s ease-in-out infinite"/>
+          <circle cx="220" cy="120" r="13" fill="#d2a8ff" opacity="0.85" style="animation:float 2.9s ease-in-out infinite"/>
+          <circle cx="60"  cy="130" r="11" fill="#39d0d8" opacity="0.85" style="animation:float 3.5s ease-in-out infinite"/>
+          <text x="90"  y="80"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7">Mind</text>
+          <text x="190" y="40"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7">Language</text>
+          <text x="220" y="120" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7">Logic</text>
+          <text x="60"  y="130" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7">Network</text>
+        </svg>
+      </div>
+      <div class="model-card-body">
+        <div class="formalism">Typed-Edge Concept Network</div>
+        <h2>Semantic Network Visualizer</h2>
+        <div class="tag-list">
+          <span class="tag">Curved edges</span>
+          <span class="tag">Typed relations</span>
+          <span class="tag">Path finding</span>
+          <span class="tag">Domain filter</span>
+        </div>
+        <p>
+          25 cross-domain concepts (philosophy, linguistics, biology, theory)
+          connected by color-coded typed edges. Find shortest paths between
+          concepts with one click, filter by relation and domain.
+        </p>
+        <a class="launch-btn" href="models/semantic-network.html">Launch Visualizer →</a>
+      </div>
+    </div>
+
+    <!-- Ontology Browser -->
+    <div class="model-card" data-model="onto">
+      <div class="model-card-preview" style="background:#120a1a">
+        <svg class="preview-svg" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+          <!-- tree lines -->
+          <line x1="140" y1="30"  x2="80"  y2="80"  stroke="#8b949e" stroke-width="1.5"/>
+          <line x1="140" y1="30"  x2="200" y2="80"  stroke="#8b949e" stroke-width="1.5"/>
+          <line x1="80"  y1="80"  x2="50"  y2="130" stroke="#8b949e" stroke-width="1.5"/>
+          <line x1="80"  y1="80"  x2="110" y2="130" stroke="#8b949e" stroke-width="1.5"/>
+          <line x1="200" y1="80"  x2="230" y2="130" stroke="#8b949e" stroke-width="1.5"/>
+          <!-- nodes -->
+          <circle cx="140" cy="30"  r="16" fill="#d2a8ff" opacity="0.9" style="animation:float 2.5s ease-in-out infinite"/>
+          <circle cx="80"  cy="80"  r="13" fill="rgba(210,168,255,0.5)" stroke="#d2a8ff" stroke-width="2" opacity="0.9" style="animation:float 3s ease-in-out infinite"/>
+          <circle cx="200" cy="80"  r="13" fill="rgba(210,168,255,0.5)" stroke="#d2a8ff" stroke-width="2" opacity="0.9" style="animation:float 2.7s ease-in-out infinite"/>
+          <circle cx="50"  cy="130" r="10" fill="rgba(210,168,255,0.3)" stroke="#d2a8ff" stroke-width="1.5" style="animation:float 3.3s ease-in-out infinite"/>
+          <circle cx="110" cy="130" r="10" fill="rgba(210,168,255,0.3)" stroke="#d2a8ff" stroke-width="1.5" style="animation:float 2.8s ease-in-out infinite"/>
+          <circle cx="230" cy="130" r="10" fill="rgba(210,168,255,0.3)" stroke="#d2a8ff" stroke-width="1.5" style="animation:float 3.1s ease-in-out infinite"/>
+          <!-- labels -->
+          <text x="140" y="30"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7">Entity</text>
+          <text x="80"  y="80"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="6">Abstract</text>
+          <text x="200" y="80"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="6">Concrete</text>
+          <text x="50"  y="130" text-anchor="middle" dominant-baseline="middle" fill="#ddd" font-size="5.5">Mental</text>
+          <text x="110" y="130" text-anchor="middle" dominant-baseline="middle" fill="#ddd" font-size="5.5">Prop.</text>
+          <text x="230" y="130" text-anchor="middle" dominant-baseline="middle" fill="#ddd" font-size="5.5">Physical</text>
+        </svg>
+      </div>
+      <div class="model-card-body">
+        <div class="formalism">Class Hierarchy (OWL-style)</div>
+        <h2>Ontology Browser</h2>
+        <div class="tag-list">
+          <span class="tag">Tree + graph</span>
+          <span class="tag">Inheritance</span>
+          <span class="tag">Properties</span>
+          <span class="tag">Instances</span>
+        </div>
+        <p>
+          Browse a 15-class OWL-style ontology of epistemic entities. The left
+          panel shows a collapsible class hierarchy; the right graph visualizes
+          subclass relations. Click any class to see inherited properties and instances.
+        </p>
+        <a class="launch-btn" href="models/ontology-browser.html">Launch Browser →</a>
+      </div>
+    </div>
+
+    <!-- Bayesian Belief Network -->
+    <div class="model-card" data-model="bayes">
+      <div class="model-card-preview" style="background:#1a1200">
+        <svg class="preview-svg" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+          <!-- directed edges -->
+          <line x1="90"  y1="30"  x2="140" y2="80"  stroke="#f0a500" stroke-width="1.5" opacity="0.7" marker-end="url(#prev-arr)"/>
+          <line x1="190" y1="30"  x2="140" y2="80"  stroke="#f0a500" stroke-width="1.5" opacity="0.7" marker-end="url(#prev-arr)"/>
+          <line x1="140" y1="80"  x2="90"  y2="130" stroke="#f0a500" stroke-width="1.5" opacity="0.7" marker-end="url(#prev-arr)"/>
+          <line x1="140" y1="80"  x2="190" y2="130" stroke="#f0a500" stroke-width="1.5" opacity="0.7" marker-end="url(#prev-arr)"/>
+          <defs>
+            <marker id="prev-arr" viewBox="0 -5 10 10" refX="14" refY="0" markerWidth="5" markerHeight="5" orient="auto">
+              <path d="M0,-5L10,0L0,5" fill="#f0a500" opacity="0.7"/>
+            </marker>
+          </defs>
+          <!-- nodes with probability colors -->
+          <circle cx="90"  cy="30"  r="16" fill="#1e1f23" stroke="#f0a500" stroke-width="2" style="animation:float 2.5s ease-in-out infinite"/>
+          <circle cx="190" cy="30"  r="16" fill="rgba(88,166,255,0.5)" stroke="#f0a500" stroke-width="2" style="animation:float 3.1s ease-in-out infinite"/>
+          <circle cx="140" cy="80"  r="18" fill="rgba(240,165,0,0.7)"   stroke="#f0a500" stroke-width="2.5" style="animation:float 2.8s ease-in-out infinite"/>
+          <circle cx="90"  cy="130" r="14" fill="rgba(88,166,255,0.6)" stroke="#f0a500" stroke-width="2" style="animation:float 3.3s ease-in-out infinite"/>
+          <circle cx="190" cy="130" r="14" fill="rgba(240,165,0,0.4)"  stroke="#f0a500" stroke-width="2" style="animation:float 2.2s ease-in-out infinite"/>
+          <!-- prob labels -->
+          <text x="90"  y="30"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" font-weight="700">12%</text>
+          <text x="190" y="30"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" font-weight="700">60%</text>
+          <text x="140" y="80"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="8" font-weight="700">73%</text>
+          <text x="90"  y="130" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" font-weight="700">68%</text>
+          <text x="190" y="130" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="7" font-weight="700">44%</text>
+          <!-- node labels below -->
+          <text x="90"  y="50"  text-anchor="middle" fill="#aaa" font-size="6">Bias</text>
+          <text x="190" y="50"  text-anchor="middle" fill="#aaa" font-size="6">Reliable</text>
+          <text x="140" y="102" text-anchor="middle" fill="#aaa" font-size="6">Justified</text>
+          <text x="90"  y="148" text-anchor="middle" fill="#aaa" font-size="6">Evidence</text>
+          <text x="190" y="148" text-anchor="middle" fill="#aaa" font-size="6">Knowledge</text>
+        </svg>
+      </div>
+      <div class="model-card-body">
+        <div class="formalism">Probabilistic Graphical Model</div>
+        <h2>Bayesian Belief Network</h2>
+        <div class="tag-list">
+          <span class="tag">Exact inference</span>
+          <span class="tag">Set evidence</span>
+          <span class="tag">Belief propagation</span>
+          <span class="tag">CPT viewer</span>
+        </div>
+        <p>
+          An 8-node Bayesian network modeling the epistemic chain from reliable
+          sources to social knowledge. Set evidence on any node (observe True/False)
+          and watch posterior probabilities propagate in real time.
+        </p>
+        <a class="launch-btn" href="models/bayesian-network.html">Launch Network →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Epistemic Knowledge Substrate &mdash; Open Source &mdash; Static web deployment, no backend required.</p>
+    <p style="margin-top:4px"><a href="https://github.com/nickjoven/l">GitHub</a></p>
+  </footer>
+</div>
+</body>
+</html>

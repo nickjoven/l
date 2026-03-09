@@ -1,0 +1,124 @@
+{
+  "classes": [
+    {
+      "id": "Entity",
+      "parent": null,
+      "label": "Entity",
+      "description": "The most general class; everything that exists or can be thought about.",
+      "properties": ["identifier", "label", "description"],
+      "instances": []
+    },
+    {
+      "id": "Abstract",
+      "parent": "Entity",
+      "label": "Abstract",
+      "description": "Entities that exist as concepts, relations, or structures rather than physical objects.",
+      "properties": ["definition", "domain"],
+      "instances": []
+    },
+    {
+      "id": "Concrete",
+      "parent": "Entity",
+      "label": "Concrete",
+      "description": "Entities with a physical or causal presence in the world.",
+      "properties": ["location", "temporalExtent"],
+      "instances": []
+    },
+    {
+      "id": "MentalEntity",
+      "parent": "Abstract",
+      "label": "Mental Entity",
+      "description": "Entities constituted by or dependent on mental processes.",
+      "properties": ["agent", "intentionality"],
+      "instances": []
+    },
+    {
+      "id": "PhysicalEntity",
+      "parent": "Concrete",
+      "label": "Physical Entity",
+      "description": "Material objects and physical processes.",
+      "properties": ["mass", "spatialExtent"],
+      "instances": []
+    },
+    {
+      "id": "Proposition",
+      "parent": "Abstract",
+      "label": "Proposition",
+      "description": "A meaningful statement that can be evaluated as true or false.",
+      "properties": ["content", "truthValue", "modality"],
+      "instances": ["'Snow is white'", "'2+2=4'", "'The Earth orbits the Sun'"]
+    },
+    {
+      "id": "Concept",
+      "parent": "MentalEntity",
+      "label": "Concept",
+      "description": "A mental representation that categorizes objects or properties.",
+      "properties": ["extension", "intension", "prototype"],
+      "instances": ["Dog", "Justice", "Causation"]
+    },
+    {
+      "id": "Belief",
+      "parent": "MentalEntity",
+      "label": "Belief",
+      "description": "A mental state in which an agent holds a proposition to be true.",
+      "properties": ["holder", "content", "degree", "justification"],
+      "instances": ["Ptolemy's geocentric belief", "Newton's belief in absolute space"]
+    },
+    {
+      "id": "Knowledge",
+      "parent": "Belief",
+      "label": "Knowledge",
+      "description": "Justified true belief (classical Gettier-prone definition).",
+      "properties": ["justificationType", "source", "reliability"],
+      "instances": ["Empirical knowledge", "A priori knowledge"]
+    },
+    {
+      "id": "Relation",
+      "parent": "Abstract",
+      "label": "Relation",
+      "description": "A connection or association between two or more entities.",
+      "properties": ["domain", "range", "arity", "symmetry"],
+      "instances": ["Causation", "Entailment", "Similarity"]
+    },
+    {
+      "id": "EpistemicRelation",
+      "parent": "Relation",
+      "label": "Epistemic Relation",
+      "description": "Relations specifically governing knowledge, justification, and evidence.",
+      "properties": ["epistemic_strength", "directionality"],
+      "instances": ["Justifies", "Is-evidence-for", "Implies"]
+    },
+    {
+      "id": "Agent",
+      "parent": "Entity",
+      "label": "Agent",
+      "description": "An entity capable of intentional action and belief formation.",
+      "properties": ["name", "cognitiveCapacity", "epistemicState"],
+      "instances": []
+    },
+    {
+      "id": "HumanAgent",
+      "parent": "Agent",
+      "label": "Human Agent",
+      "description": "A human knower and epistemic agent.",
+      "properties": ["language", "culture", "biases"],
+      "instances": ["Socrates", "Kant", "Turing"]
+    },
+    {
+      "id": "ArtificialAgent",
+      "parent": "Agent",
+      "label": "Artificial Agent",
+      "description": "A computational system capable of belief-like states and reasoning.",
+      "properties": ["architecture", "trainingData", "objectiveFunction"],
+      "instances": ["Expert System", "Large Language Model", "Theorem Prover"]
+    },
+    {
+      "id": "EpistemicSource",
+      "parent": "Abstract",
+      "label": "Epistemic Source",
+      "description": "A basis or origin from which justified beliefs can be derived.",
+      "properties": ["reliability", "type"],
+      "instances": ["Perception", "Memory", "Testimony", "Reason", "Intuition"]
+    }
+  ]
+}
