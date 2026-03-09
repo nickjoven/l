@@ -3,120 +3,120 @@
     {
       "id": "Entity",
       "parent": null,
-      "label": "Entity",
-      "description": "The most general class; everything that exists or can be thought about.",
+      "label": "Anything That Exists Fr",
+      "description": "The most general bucket. If it exists or can even be thought about, it goes here. Maximum scope.",
       "properties": ["identifier", "label", "description"],
       "instances": []
     },
     {
       "id": "Abstract",
       "parent": "Entity",
-      "label": "Abstract",
-      "description": "Entities that exist as concepts, relations, or structures rather than physical objects.",
+      "label": "Lives Rent Free (Conceptual)",
+      "description": "Things that exist as ideas, relations, or structures rather than physical objects. No mass, full presence.",
       "properties": ["definition", "domain"],
       "instances": []
     },
     {
       "id": "Concrete",
       "parent": "Entity",
-      "label": "Concrete",
-      "description": "Entities with a physical or causal presence in the world.",
+      "label": "Touchable IRL Thing",
+      "description": "Entities with an actual physical or causal presence in the world. You could stub your toe on these.",
       "properties": ["location", "temporalExtent"],
       "instances": []
     },
     {
       "id": "MentalEntity",
       "parent": "Abstract",
-      "label": "Mental Entity",
-      "description": "Entities constituted by or dependent on mental processes.",
+      "label": "Brain Resident",
+      "description": "Entities that live in or depend on mental processes. Constituted by cognition. Cannot be yeeted from existence by physical means.",
       "properties": ["agent", "intentionality"],
       "instances": []
     },
     {
       "id": "PhysicalEntity",
       "parent": "Concrete",
-      "label": "Physical Entity",
-      "description": "Material objects and physical processes.",
+      "label": "Actual Material Object",
+      "description": "Has mass, takes up space, exists in time. The kind of thing that existed before you thought about it.",
       "properties": ["mass", "spatialExtent"],
       "instances": []
     },
     {
       "id": "Proposition",
       "parent": "Abstract",
-      "label": "Proposition",
-      "description": "A meaningful statement that can be evaluated as true or false.",
+      "label": "Checkable Take",
+      "description": "A statement that can be ratio'd by reality. Either true or false — no vibes-based middle ground.",
       "properties": ["content", "truthValue", "modality"],
       "instances": ["'Snow is white'", "'2+2=4'", "'The Earth orbits the Sun'"]
     },
     {
       "id": "Concept",
       "parent": "MentalEntity",
-      "label": "Concept",
-      "description": "A mental representation that categorizes objects or properties.",
+      "label": "Idea Blob",
+      "description": "A mental representation grouping objects or properties under a shared vibe. Your brain's filing system.",
       "properties": ["extension", "intension", "prototype"],
       "instances": ["Dog", "Justice", "Causation"]
     },
     {
       "id": "Belief",
       "parent": "MentalEntity",
-      "label": "Belief",
-      "description": "A mental state in which an agent holds a proposition to be true.",
+      "label": "Manifesting It To Be True",
+      "description": "A mental state where you're holding a proposition as true. Receipts not required. Could be entirely cooked.",
       "properties": ["holder", "content", "degree", "justification"],
       "instances": ["Ptolemy's geocentric belief", "Newton's belief in absolute space"]
     },
     {
       "id": "Knowledge",
       "parent": "Belief",
-      "label": "Knowledge",
-      "description": "Justified true belief (classical Gettier-prone definition).",
+      "label": "Certified W (Backed Up)",
+      "description": "Justified true belief — the belief is backed, it's actually true, and the backing is legit. Gettier cases still haunt this definition though.",
       "properties": ["justificationType", "source", "reliability"],
       "instances": ["Empirical knowledge", "A priori knowledge"]
     },
     {
       "id": "Relation",
       "parent": "Abstract",
-      "label": "Relation",
-      "description": "A connection or association between two or more entities.",
+      "label": "The Connection Arc",
+      "description": "A link or association between two or more entities. How things relate to each other. The edges, not the nodes.",
       "properties": ["domain", "range", "arity", "symmetry"],
       "instances": ["Causation", "Entailment", "Similarity"]
     },
     {
       "id": "EpistemicRelation",
       "parent": "Relation",
-      "label": "Epistemic Relation",
-      "description": "Relations specifically governing knowledge, justification, and evidence.",
+      "label": "Knowledge Link",
+      "description": "Relations specifically about how knowledge, justification, and evidence connect. The architecture of knowing.",
       "properties": ["epistemic_strength", "directionality"],
       "instances": ["Justifies", "Is-evidence-for", "Implies"]
     },
     {
       "id": "Agent",
       "parent": "Entity",
-      "label": "Agent",
-      "description": "An entity capable of intentional action and belief formation.",
+      "label": "The Knower (Does Stuff)",
+      "description": "An entity capable of intentional action and forming beliefs. Has opinions. May or may not have receipts.",
       "properties": ["name", "cognitiveCapacity", "epistemicState"],
       "instances": []
     },
     {
       "id": "HumanAgent",
       "parent": "Agent",
-      "label": "Human Agent",
-      "description": "A human knower and epistemic agent.",
+      "label": "Regular Person (Organic)",
+      "description": "A human knower. Biased, language-using, culturally embedded epistemic agent. Skill-issued at birth.",
       "properties": ["language", "culture", "biases"],
       "instances": ["Socrates", "Kant", "Turing"]
     },
     {
       "id": "ArtificialAgent",
       "parent": "Agent",
-      "label": "Artificial Agent",
-      "description": "A computational system capable of belief-like states and reasoning.",
+      "label": "AI Doing Its Thing",
+      "description": "A computational system with belief-like states and reasoning capacity. Architecture-pilled, training-data-coded.",
       "properties": ["architecture", "trainingData", "objectiveFunction"],
       "instances": ["Expert System", "Large Language Model", "Theorem Prover"]
     },
     {
       "id": "EpistemicSource",
       "parent": "Abstract",
-      "label": "Epistemic Source",
-      "description": "A basis or origin from which justified beliefs can be derived.",
+      "label": "Where The Knowledge Came From",
+      "description": "The origin story of a justified belief. Could be reliable, could be cooked. The basis matters.",
       "properties": ["reliability", "type"],
       "instances": ["Perception", "Memory", "Testimony", "Reason", "Intuition"]
     }

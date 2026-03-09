@@ -2,24 +2,24 @@
   "nodes": [
     {
       "id": "reliable_source",
-      "label": "Reliable Source",
-      "description": "The testimony or evidence comes from a historically reliable source.",
+      "label": "Actually Credible Source",
+      "description": "The testimony or evidence comes from a historically verified, not-chronically-wrong source. Track record matters.",
       "parents": [],
       "prior": 0.6,
       "cpt": null
     },
     {
       "id": "bias",
-      "label": "Cognitive Bias",
-      "description": "The agent has a relevant cognitive bias (confirmation bias, anchoring, etc.).",
+      "label": "Brain Glitch (Bias)",
+      "description": "The agent has a relevant cognitive bias — confirmation bias, anchoring, the works. Brain running legacy code.",
       "parents": [],
       "prior": 0.4,
       "cpt": null
     },
     {
       "id": "evidence_strength",
-      "label": "Strong Evidence",
-      "description": "The available evidence is strong and well-corroborated.",
+      "label": "Hard Receipts",
+      "description": "The available evidence is strong, well-corroborated, and survives scrutiny. Not just vibes — actual tea.",
       "parents": ["reliable_source"],
       "prior": null,
       "cpt": {
@@ -29,8 +29,8 @@
     },
     {
       "id": "justified_belief",
-      "label": "Justified Belief",
-      "description": "The agent has a belief that is epistemically justified.",
+      "label": "Backed-Up Take",
+      "description": "The agent holds a belief that is epistemically justified — they have the receipts and they're real.",
       "parents": ["evidence_strength", "bias"],
       "prior": null,
       "cpt": {
@@ -42,8 +42,8 @@
     },
     {
       "id": "true_proposition",
-      "label": "True Proposition",
-      "description": "The believed proposition actually corresponds to reality.",
+      "label": "Actually Real Facts",
+      "description": "The believed proposition actually corresponds to how things are. No cap, no fiction — maps to territory.",
       "parents": ["reliable_source"],
       "prior": null,
       "cpt": {
@@ -53,8 +53,8 @@
     },
     {
       "id": "knowledge",
-      "label": "Knowledge",
-      "description": "The agent has knowledge (justified true belief, assuming no Gettier cases).",
+      "label": "Full Send (Locked In)",
+      "description": "The agent has certified knowledge — backed-up take that's also true. Assuming no Gettier demons showed up.",
       "parents": ["justified_belief", "true_proposition"],
       "prior": null,
       "cpt": {
@@ -66,8 +66,8 @@
     },
     {
       "id": "testimony_shared",
-      "label": "Testimony Shared",
-      "description": "The agent shares their knowledge via testimony to others.",
+      "label": "Spreading The Lore",
+      "description": "The agent shares their knowledge via testimony. The lore propagates. Group chat gets the download.",
       "parents": ["knowledge"],
       "prior": null,
       "cpt": {
@@ -77,8 +77,8 @@
     },
     {
       "id": "social_knowledge",
-      "label": "Social Knowledge",
-      "description": "The knowledge propagates into the social/collective epistemic sphere.",
+      "label": "The Group Chat Knows",
+      "description": "The knowledge has propagated into the collective epistemic sphere. It's in the air now. Shared lore achieved.",
       "parents": ["testimony_shared", "reliable_source"],
       "prior": null,
       "cpt": {
