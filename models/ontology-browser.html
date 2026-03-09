@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ontology Browser — Epistemic Substrate</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .split-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .tree-panel {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .tree-canvas {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .tree-canvas svg {
+      width: 100%; height: 100%;
+    }
+    .props-panel {
+      width: 280px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      flex-shrink: 0;
+      padding: 16px;
+    }
+    /* Interactive tree list */
+    .tree-list {
+      list-style: none;
+      padding: 0;
+    }
+    .tree-item {
+      user-select: none;
+    }
+    .tree-item-row {
+      display: flex;
+      align-items: center;
+      padding: 5px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 13px;
+      transition: background 0.1s;
+    }
+    .tree-item-row:hover { background: var(--surface2); }
+    .tree-item-row.selected { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .tree-toggle {
+      width: 16px;
+      height: 16px;
+      margin-right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .tree-children {
+      padding-left: 18px;
+    }
+    .breadcrumb {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .breadcrumb span { color: var(--text-muted); }
+    .breadcrumb .crumb { color: var(--accent); cursor: pointer; }
+    .breadcrumb .crumb:hover { text-decoration: underline; }
+    .prop-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      margin: 2px;
+    }
+    .instance-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      background: rgba(86,211,100,0.1);
+      border: 1px solid var(--sn-color);
+      color: var(--sn-color);
+      margin: 2px;
+    }
+    .inherited-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <header class="app-header">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <h1 style="color: var(--onto-color)">Ontology Browser</h1>
+    <span style="color:var(--text-muted); font-size:12px; margin-left:auto">Class Hierarchy (OWL-style)</span>
+  </header>
+
+  <div class="split-layout">
+    <!-- Tree list panel -->
+    <div class="tree-panel">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted)">Class Hierarchy</div>
+      <div id="breadcrumb" class="breadcrumb"></div>
+      <ul class="tree-list" id="tree-list" style="padding:8px 8px;"></ul>
+    </div>
+
+    <!-- Force graph canvas -->
+    <div class="tree-canvas" id="canvas">
+      <svg id="svg"></svg>
+    </div>
+
+    <!-- Properties panel -->
+    <div class="props-panel" id="props-panel">
+      <p style="color:var(--text-muted);font-size:13px;margin-top:8px">
+        Click a class to view its properties, inheritance chain, and instances.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+let ontologyData = { classes: [] };
+let classMap = {};
+let selectedClass = null;
+let simulation, svg, g, linkSel, nodeSel;
+
+const tooltip = (() => {
+  const el = document.createElement('div');
+  el.className = 'tooltip';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  return el;
+})();
+
+async function init() {
+  const res = await fetch('../data/ontology.json');
+  ontologyData = await res.json();
+  ontologyData.classes.forEach(c => { classMap[c.id] = c; });
+  buildTreeList();
+  buildForceGraph();
+}
+
+// ── Tree List ──────────────────────────────────────────────────
+function buildTreeList() {
+  const roots = ontologyData.classes.filter(c => c.parent === null);
+  const ul = document.getElementById('tree-list');
+  ul.innerHTML = '';
+  roots.forEach(root => ul.appendChild(buildTreeNode(root)));
+}
+
+function buildTreeNode(cls, depth = 0) {
+  const children = ontologyData.classes.filter(c => c.parent === cls.id);
+  const li = document.createElement('li');
+  li.className = 'tree-item';
+
+  const row = document.createElement('div');
+  row.className = 'tree-item-row';
+
+  const toggle = document.createElement('span');
+  toggle.className = 'tree-toggle';
+  toggle.textContent = children.length ? '▶' : ' ';
+
+  const label = document.createElement('span');
+  label.textContent = cls.label;
+
+  row.appendChild(toggle);
+  row.appendChild(label);
+  li.appendChild(row);
+
+  let expanded = false;
+  let childrenUl = null;
+
+  if (children.length) {
+    childrenUl = document.createElement('ul');
+    childrenUl.className = 'tree-children';
+    childrenUl.style.display = 'none';
+    children.forEach(child => childrenUl.appendChild(buildTreeNode(child, depth + 1)));
+    li.appendChild(childrenUl);
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      expanded = !expanded;
+      toggle.textContent = expanded ? '▼' : '▶';
+      childrenUl.style.display = expanded ? 'block' : 'none';
+    });
+  }
+
+  row.addEventListener('click', () => {
+    document.querySelectorAll('.tree-item-row').forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    selectClass(cls.id);
+  });
+
+  return li;
+}
+
+// ── Force Graph ────────────────────────────────────────────────
+function buildForceGraph() {
+  const container = document.getElementById('canvas');
+  const W = container.clientWidth || 600;
+  const H = container.clientHeight || 600;
+
+  svg = d3.select('#svg').attr('viewBox', [0, 0, W, H]).style('background', 'var(--bg)');
+
+  const defs = svg.append('defs');
+  defs.append('marker')
+    .attr('id', 'arrow-onto')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 24).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6)
+    .attr('orient', 'auto')
+    .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', '#8b949e');
+
+  g = svg.append('g');
+  svg.call(d3.zoom().scaleExtent([0.1, 8]).on('zoom', e => g.attr('transform', e.transform)));
+
+  const links = ontologyData.classes
+    .filter(c => c.parent !== null)
+    .map(c => ({ source: c.parent, target: c.id }));
+
+  simulation = d3.forceSimulation(ontologyData.classes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(100))
+    .force('charge', d3.forceManyBody().strength(-250))
+    .force('center', d3.forceCenter(W / 2, H / 2))
+    .force('collision', d3.forceCollide(36));
+
+  linkSel = g.append('g').selectAll('line')
+    .data(links).enter().append('line')
+    .attr('stroke', 'var(--border)')
+    .attr('stroke-width', 2)
+    .attr('marker-end', 'url(#arrow-onto)');
+
+  nodeSel = g.append('g').selectAll('g')
+    .data(ontologyData.classes, d => d.id)
+    .enter().append('g')
+    .attr('class', 'node')
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (e, d) => { d.fx=e.x; d.fy=e.y; })
+      .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; }))
+    .on('click', (e, d) => { e.stopPropagation(); selectClass(d.id); })
+    .on('mouseover', (e, d) => showTooltip(e, d))
+    .on('mousemove', e => { tooltip.style.left=(e.clientX+16)+'px'; tooltip.style.top=(e.clientY-10)+'px'; })
+    .on('mouseout', () => tooltip.style.opacity='0');
+
+  nodeSel.append('circle')
+    .attr('r', 22)
+    .attr('fill', d => d.parent === null ? 'var(--onto-color)' : 'rgba(210,168,255,0.4)')
+    .attr('stroke', 'var(--onto-color)')
+    .attr('stroke-width', 2);
+
+  nodeSel.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .attr('font-size', '9px')
+    .attr('fill', '#fff')
+    .attr('pointer-events', 'none')
+    .text(d => d.label.length > 10 ? d.label.slice(0, 9) + '…' : d.label);
+
+  simulation.on('tick', () => {
+    linkSel
+      .attr('x1', d => d.source.x||0).attr('y1', d => d.source.y||0)
+      .attr('x2', d => d.target.x||0).attr('y2', d => d.target.y||0);
+    nodeSel.attr('transform', d => `translate(${d.x||0},${d.y||0})`);
+  });
+}
+
+// ── Class Selection ────────────────────────────────────────────
+function selectClass(id) {
+  selectedClass = classMap[id];
+  if (!selectedClass) return;
+
+  // Highlight in force graph
+  nodeSel.select('circle')
+    .attr('stroke', d => d.id === id ? '#fff' : 'var(--onto-color)')
+    .attr('stroke-width', d => d.id === id ? 4 : 2)
+    .attr('fill', d => {
+      if (d.id === id) return 'var(--onto-color)';
+      if (d.parent === null) return 'var(--onto-color)';
+      return 'rgba(210,168,255,0.4)';
+    });
+
+  updateBreadcrumb(id);
+  renderPropsPanel(selectedClass);
+}
+
+function getAncestors(id) {
+  const path = [];
+  let current = classMap[id];
+  while (current) {
+    path.unshift(current);
+    current = current.parent ? classMap[current.parent] : null;
+  }
+  return path;
+}
+
+function getAllInheritedProps(id) {
+  const ancestors = getAncestors(id);
+  const inherited = [];
+  for (let i = 0; i < ancestors.length - 1; i++) {
+    ancestors[i].properties.forEach(p => inherited.push({ prop: p, from: ancestors[i].label }));
+  }
+  return inherited;
+}
+
+function updateBreadcrumb(id) {
+  const ancestors = getAncestors(id);
+  const bc = document.getElementById('breadcrumb');
+  bc.innerHTML = ancestors.map((a, i) =>
+    i < ancestors.length - 1
+      ? `<span class="crumb" onclick="selectClass('${a.id}')">${a.label}</span><span>›</span>`
+      : `<span style="color:var(--text)">${a.label}</span>`
+  ).join('');
+}
+
+function renderPropsPanel(cls) {
+  const inherited = getAllInheritedProps(cls.id);
+  const children  = ontologyData.classes.filter(c => c.parent === cls.id);
+
+  const inheritedHtml = inherited.length
+    ? inherited.map(ip => `<span class="prop-chip"><span class="inherited-label">${ip.from} ›</span> ${ip.prop}</span>`).join('')
+    : '<span style="color:var(--text-muted);font-size:12px">None</span>';
+
+  const ownPropsHtml = cls.properties.length
+    ? cls.properties.map(p => `<span class="prop-chip">${p}</span>`).join('')
+    : '<span style="color:var(--text-muted);font-size:12px">None</span>';
+
+  const instancesHtml = cls.instances && cls.instances.length
+    ? cls.instances.map(i => `<span class="instance-chip">${i}</span>`).join('')
+    : '<span style="color:var(--text-muted);font-size:12px">No instances defined</span>';
+
+  const childrenHtml = children.length
+    ? children.map(c => `<span class="prop-chip" style="cursor:pointer;color:var(--onto-color)" onclick="selectClass('${c.id}')">${c.label}</span>`).join('')
+    : '<span style="color:var(--text-muted);font-size:12px">Leaf class</span>';
+
+  const parentHtml = cls.parent
+    ? `<span class="prop-chip" style="cursor:pointer;color:var(--onto-color)" onclick="selectClass('${cls.parent}')">${classMap[cls.parent]?.label || cls.parent}</span>`
+    : '<span style="color:var(--text-muted);font-size:12px">Root class</span>';
+
+  document.getElementById('props-panel').innerHTML = `
+    <h2>${cls.label}</h2>
+    <p class="definition" style="margin-bottom:16px">${cls.description || ''}</p>
+
+    <h3>Parent Class</h3>
+    <div style="margin-bottom:12px">${parentHtml}</div>
+
+    <h3>Subclasses</h3>
+    <div style="margin-bottom:12px">${childrenHtml}</div>
+
+    <h3>Own Properties</h3>
+    <div style="margin-bottom:12px">${ownPropsHtml}</div>
+
+    <h3>Inherited Properties</h3>
+    <div style="margin-bottom:12px">${inheritedHtml}</div>
+
+    <h3>Instances</h3>
+    <div>${instancesHtml}</div>
+  `;
+}
+
+function showTooltip(event, d) {
+  tooltip.innerHTML = `<h4>${d.label}</h4><p>${(d.description || '').slice(0, 100)}…</p>`;
+  tooltip.style.opacity = '1';
+  tooltip.style.left = (event.clientX + 16) + 'px';
+  tooltip.style.top  = (event.clientY - 10) + 'px';
+}
+
+window.addEventListener('resize', () => {
+  const W = document.getElementById('canvas').clientWidth;
+  const H = document.getElementById('canvas').clientHeight;
+  svg.attr('viewBox', [0, 0, W, H]);
+  simulation.force('center', d3.forceCenter(W/2, H/2)).alpha(0.3).restart();
+});
+
+init();
+</script>
+</body>
+</html>

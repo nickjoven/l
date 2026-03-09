@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Graph Explorer — Epistemic Substrate</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .node-type-filter { margin-bottom: 4px; }
+    .search-highlight { animation: pulse 0.6s ease 2; }
+    @keyframes pulse {
+      0%,100% { filter: drop-shadow(0 0 0px white); }
+      50%      { filter: drop-shadow(0 0 14px white); }
+    }
+    #add-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    #add-modal.open { display: flex; }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      width: 360px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-box h3 { margin-bottom: 16px; font-size: 16px; }
+    .tab-row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-weight: 500;
+      padding: 6px;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- Header -->
+  <header class="app-header">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <h1 style="color: var(--kg-color)">Knowledge Graph Explorer</h1>
+    <span style="color:var(--text-muted); font-size:12px; margin-left:auto">Entity–Relation Graph</span>
+  </header>
+
+  <div class="main-content">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>Search</h3>
+        <input type="text" id="search-input" placeholder="Search nodes…">
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Node Types</h3>
+        <div class="checkbox-list" id="type-filters"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Edge Relations</h3>
+        <div class="checkbox-list" id="rel-filters"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Actions</h3>
+        <div class="btn-row" style="flex-direction:column; gap:6px">
+          <button onclick="openModal()">+ Add Node / Edge</button>
+          <button class="secondary" onclick="resetView()">Reset View</button>
+          <button class="secondary" onclick="clearSelection()">Clear Selection</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Legend</h3>
+        <div class="legend" id="type-legend"></div>
+      </div>
+    </aside>
+
+    <!-- Canvas -->
+    <div class="canvas-area" id="canvas">
+      <svg id="svg"></svg>
+    </div>
+
+    <!-- Info Panel -->
+    <aside class="info-panel" id="info-panel">
+      <div id="info-content">
+        <p style="color:var(--text-muted); font-size:13px; margin-top:8px">
+          Click a node to explore its properties and connections.
+        </p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Add Node/Edge Modal -->
+<div id="add-modal">
+  <div class="modal-box">
+    <h3>Add to Graph</h3>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('node')">Node</button>
+      <button class="tab-btn" onclick="switchTab('edge')">Edge</button>
+    </div>
+    <div id="tab-node" class="tab-content active">
+      <label>ID (unique)</label>
+      <input type="text" id="new-node-id" placeholder="my_concept">
+      <label>Label</label>
+      <input type="text" id="new-node-label" placeholder="My Concept">
+      <label>Type</label>
+      <select id="new-node-type">
+        <option value="epistemic">epistemic</option>
+        <option value="mental-state">mental-state</option>
+        <option value="cognitive">cognitive</option>
+        <option value="logical">logical</option>
+        <option value="social">social</option>
+        <option value="metaphysical">metaphysical</option>
+        <option value="linguistic">linguistic</option>
+      </select>
+      <label>Definition</label>
+      <textarea id="new-node-def" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 10px;font-size:13px;resize:vertical;" placeholder="Enter definition…"></textarea>
+      <div class="btn-row" style="margin-top:16px">
+        <button onclick="addNode()">Add Node</button>
+        <button class="secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+    <div id="tab-edge" class="tab-content">
+      <label>Source Node ID</label>
+      <input type="text" id="new-edge-source" placeholder="e.g. belief">
+      <label>Target Node ID</label>
+      <input type="text" id="new-edge-target" placeholder="e.g. knowledge">
+      <label>Relation</label>
+      <select id="new-edge-rel">
+        <option value="requires">requires</option>
+        <option value="enables">enables</option>
+        <option value="causes">causes</option>
+        <option value="supports">supports</option>
+        <option value="opposes">opposes</option>
+        <option value="defines">defines</option>
+        <option value="has">has</option>
+        <option value="implies">implies</option>
+      </select>
+      <div class="btn-row" style="margin-top:16px">
+        <button onclick="addEdge()">Add Edge</button>
+        <button class="secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+const NODE_COLORS = {
+  'mental-state':  '#58a6ff',
+  'epistemic':     '#d2a8ff',
+  'logical':       '#56d364',
+  'cognitive':     '#39d0d8',
+  'social':        '#f0a500',
+  'metaphysical':  '#f78166',
+  'linguistic':    '#e8c77a',
+  'default':       '#8b949e'
+};
+
+const REL_COLORS = {
+  'requires': '#d2a8ff',
+  'enables':  '#56d364',
+  'causes':   '#f78166',
+  'supports': '#7ee8a2',
+  'opposes':  '#f0a500',
+  'defines':  '#e8c77a',
+  'has':      '#9ecfff',
+  'implies':  '#c4a3f5',
+  'default':  '#8b949e'
+};
+
+function nodeColor(type) { return NODE_COLORS[type] || NODE_COLORS.default; }
+function relColor(rel)   { return REL_COLORS[rel]  || REL_COLORS.default; }
+
+let graphData = { nodes: [], edges: [] };
+let simulation, svg, g, linkSel, nodeSel, labelSel;
+let selectedNode = null;
+let activeNodeTypes = new Set();
+let activeRelTypes  = new Set();
+const tooltip = createTooltipEl();
+
+function createTooltipEl() {
+  const el = document.createElement('div');
+  el.className = 'tooltip';
+  el.style.opacity = '0';
+  document.body.appendChild(el);
+  return el;
+}
+
+async function init() {
+  const res = await fetch('../data/knowledge-graph.json');
+  graphData = await res.json();
+  // Normalise edge source/target to id strings
+  graphData.edges.forEach(e => {
+    e.source = typeof e.source === 'object' ? e.source.id : e.source;
+    e.target = typeof e.target === 'object' ? e.target.id : e.target;
+  });
+
+  buildFilters();
+  buildLegend();
+  buildGraph();
+}
+
+function buildFilters() {
+  // Node types
+  const types = [...new Set(graphData.nodes.map(n => n.type))].sort();
+  types.forEach(t => activeNodeTypes.add(t));
+  const tf = document.getElementById('type-filters');
+  types.forEach(t => {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.addEventListener('change', () => {
+      cb.checked ? activeNodeTypes.add(t) : activeNodeTypes.delete(t);
+      applyFilters();
+    });
+    const dot = document.createElement('span');
+    dot.style.cssText = `display:inline-block;width:10px;height:10px;border-radius:50%;background:${nodeColor(t)};`;
+    label.appendChild(cb);
+    label.appendChild(dot);
+    label.appendChild(document.createTextNode(' ' + t));
+    tf.appendChild(label);
+  });
+
+  // Relation types
+  const rels = [...new Set(graphData.edges.map(e => e.relation))].sort();
+  rels.forEach(r => activeRelTypes.add(r));
+  const rf = document.getElementById('rel-filters');
+  rels.forEach(r => {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = true;
+    cb.addEventListener('change', () => {
+      cb.checked ? activeRelTypes.add(r) : activeRelTypes.delete(r);
+      applyFilters();
+    });
+    const line = document.createElement('span');
+    line.style.cssText = `display:inline-block;width:16px;height:3px;border-radius:2px;background:${relColor(r)};`;
+    label.appendChild(cb);
+    label.appendChild(line);
+    label.appendChild(document.createTextNode(' ' + r));
+    rf.appendChild(label);
+  });
+}
+
+function buildLegend() {
+  const types = [...new Set(graphData.nodes.map(n => n.type))].sort();
+  const leg = document.getElementById('type-legend');
+  types.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'legend-item';
+    div.innerHTML = `<span class="legend-swatch" style="background:${nodeColor(t)}"></span>${t}`;
+    leg.appendChild(div);
+  });
+}
+
+function buildGraph() {
+  const container = document.getElementById('canvas');
+  const W = container.clientWidth || 800;
+  const H = container.clientHeight || 600;
+
+  svg = d3.select('#svg')
+    .attr('viewBox', [0, 0, W, H])
+    .style('background', 'var(--bg)');
+
+  // Arrow markers per relation type
+  const defs = svg.append('defs');
+  Object.entries(REL_COLORS).forEach(([rel, color]) => {
+    defs.append('marker')
+      .attr('id', `arrow-${rel}`)
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 22)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', color)
+      .attr('opacity', 0.7);
+  });
+
+  g = svg.append('g');
+
+  // Zoom
+  svg.call(d3.zoom().scaleExtent([0.1, 8]).on('zoom', e => g.attr('transform', e.transform)));
+
+  // Simulation
+  simulation = d3.forceSimulation(graphData.nodes)
+    .force('link', d3.forceLink(graphData.edges).id(d => d.id).distance(120))
+    .force('charge', d3.forceManyBody().strength(-300))
+    .force('center', d3.forceCenter(W / 2, H / 2))
+    .force('collision', d3.forceCollide(30));
+
+  linkSel  = g.append('g').attr('class', 'links').selectAll('line');
+  nodeSel  = g.append('g').attr('class', 'nodes').selectAll('g');
+  labelSel = g.append('g').attr('class', 'labels').selectAll('text');
+
+  renderGraph();
+
+  simulation.on('tick', ticked);
+}
+
+function renderGraph() {
+  const nodeData = graphData.nodes;
+  const edgeData = graphData.edges;
+
+  // Links
+  linkSel = linkSel.data(edgeData, d => `${d.source.id||d.source}-${d.target.id||d.target}`);
+  linkSel.exit().remove();
+  const linkEnter = linkSel.enter().append('line')
+    .attr('class', 'link')
+    .attr('stroke', d => relColor(d.relation))
+    .attr('stroke-width', 1.5)
+    .attr('opacity', 0.6)
+    .attr('marker-end', d => `url(#arrow-${d.relation})`);
+  linkSel = linkEnter.merge(linkSel);
+
+  // Nodes
+  nodeSel = nodeSel.data(nodeData, d => d.id);
+  nodeSel.exit().remove();
+  const nodeEnter = nodeSel.enter().append('g')
+    .attr('class', 'node')
+    .call(d3.drag()
+      .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (event, d) => { d.fx=event.x; d.fy=event.y; })
+      .on('end',   (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; }))
+    .on('click', (event, d) => { event.stopPropagation(); selectNode(d); })
+    .on('mouseover', (event, d) => showTooltip(event, d))
+    .on('mousemove', moveTooltip)
+    .on('mouseout',  hideTooltip);
+
+  nodeEnter.append('circle')
+    .attr('r', 18)
+    .attr('fill', d => nodeColor(d.type))
+    .attr('stroke', '#0d1117')
+    .attr('stroke-width', 2)
+    .attr('fill-opacity', 0.85);
+
+  nodeEnter.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .attr('font-size', '9px')
+    .attr('fill', '#fff')
+    .attr('pointer-events', 'none')
+    .text(d => d.label.length > 9 ? d.label.slice(0, 8) + '…' : d.label);
+
+  nodeSel = nodeEnter.merge(nodeSel);
+
+  svg.on('click', () => clearSelection());
+
+  simulation.nodes(nodeData);
+  simulation.force('link').links(edgeData);
+  simulation.alpha(0.3).restart();
+}
+
+function ticked() {
+  linkSel
+    .attr('x1', d => (d.source.x || 0))
+    .attr('y1', d => (d.source.y || 0))
+    .attr('x2', d => (d.target.x || 0))
+    .attr('y2', d => (d.target.y || 0));
+
+  nodeSel.attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
+}
+
+function applyFilters() {
+  if (!nodeSel) return;
+  nodeSel.style('display', d => activeNodeTypes.has(d.type) ? null : 'none');
+  linkSel.style('display', d => {
+    const sId = typeof d.source === 'object' ? d.source.id : d.source;
+    const tId = typeof d.target === 'object' ? d.target.id : d.target;
+    const sNode = graphData.nodes.find(n => n.id === sId);
+    const tNode = graphData.nodes.find(n => n.id === tId);
+    if (!sNode || !tNode) return 'none';
+    if (!activeNodeTypes.has(sNode.type) || !activeNodeTypes.has(tNode.type)) return 'none';
+    if (!activeRelTypes.has(d.relation)) return 'none';
+    return null;
+  });
+}
+
+function selectNode(d) {
+  selectedNode = d;
+  nodeSel.select('circle')
+    .attr('stroke', n => n.id === d.id ? '#fff' : '#0d1117')
+    .attr('stroke-width', n => n.id === d.id ? 4 : 2);
+
+  // Dim non-connected
+  const connectedIds = new Set([d.id]);
+  graphData.edges.forEach(e => {
+    const sId = typeof e.source === 'object' ? e.source.id : e.source;
+    const tId = typeof e.target === 'object' ? e.target.id : e.target;
+    if (sId === d.id) connectedIds.add(tId);
+    if (tId === d.id) connectedIds.add(sId);
+  });
+  nodeSel.attr('opacity', n => connectedIds.has(n.id) ? 1 : 0.2);
+  linkSel.attr('opacity', e => {
+    const sId = typeof e.source === 'object' ? e.source.id : e.source;
+    const tId = typeof e.target === 'object' ? e.target.id : e.target;
+    return (sId === d.id || tId === d.id) ? 0.9 : 0.05;
+  });
+
+  renderInfoPanel(d);
+}
+
+function clearSelection() {
+  selectedNode = null;
+  nodeSel.select('circle').attr('stroke', '#0d1117').attr('stroke-width', 2);
+  nodeSel.attr('opacity', 1);
+  linkSel.attr('opacity', 0.6);
+  document.getElementById('info-content').innerHTML =
+    '<p style="color:var(--text-muted);font-size:13px;margin-top:8px">Click a node to explore its properties and connections.</p>';
+}
+
+function renderInfoPanel(d) {
+  const outEdges = graphData.edges.filter(e => {
+    const sId = typeof e.source === 'object' ? e.source.id : e.source;
+    return sId === d.id;
+  });
+  const inEdges = graphData.edges.filter(e => {
+    const tId = typeof e.target === 'object' ? e.target.id : e.target;
+    return tId === d.id;
+  });
+
+  const outItems = outEdges.map(e => {
+    const tId = typeof e.target === 'object' ? e.target.id : e.target;
+    const tn = graphData.nodes.find(n => n.id === tId);
+    return `<li style="border-left-color:${relColor(e.relation)}">
+      <span class="rel">${e.relation}</span> → ${tn ? tn.label : tId}
+    </li>`;
+  }).join('');
+
+  const inItems = inEdges.map(e => {
+    const sId = typeof e.source === 'object' ? e.source.id : e.source;
+    const sn = graphData.nodes.find(n => n.id === sId);
+    return `<li style="border-left-color:${relColor(e.relation)}">
+      ${sn ? sn.label : sId} <span class="rel">${e.relation}</span> →
+    </li>`;
+  }).join('');
+
+  document.getElementById('info-content').innerHTML = `
+    <h2>${d.label}</h2>
+    <span class="type-badge" style="color:${nodeColor(d.type)};border-color:${nodeColor(d.type)}">${d.type}</span>
+    <p class="definition">${d.definition || ''}</p>
+    ${outItems ? `<h3>Outgoing Relations</h3><ul class="edge-list">${outItems}</ul>` : ''}
+    ${inItems  ? `<h3>Incoming Relations</h3><ul class="edge-list">${inItems}</ul>`  : ''}
+    <div style="margin-top:16px">
+      <button class="danger secondary" style="font-size:12px;padding:4px 10px" onclick="deleteNode('${d.id}')">Delete Node</button>
+    </div>
+  `;
+}
+
+function deleteNode(id) {
+  graphData.nodes = graphData.nodes.filter(n => n.id !== id);
+  graphData.edges = graphData.edges.filter(e => {
+    const sId = typeof e.source === 'object' ? e.source.id : e.source;
+    const tId = typeof e.target === 'object' ? e.target.id : e.target;
+    return sId !== id && tId !== id;
+  });
+  clearSelection();
+  buildFilters();
+  renderGraph();
+}
+
+// Search
+document.getElementById('search-input').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  if (!q) { nodeSel.attr('opacity', 1); return; }
+  nodeSel.attr('opacity', d => {
+    const matches = d.label.toLowerCase().includes(q) || d.id.toLowerCase().includes(q);
+    if (matches) {
+      const nodeEl = nodeSel.filter(n => n.id === d.id).select('circle');
+      nodeEl.classed('search-highlight', false);
+      setTimeout(() => nodeEl.classed('search-highlight', true), 0);
+    }
+    return matches ? 1 : 0.1;
+  });
+});
+
+// Tooltip
+function showTooltip(event, d) {
+  tooltip.innerHTML = `<h4>${d.label}</h4><p>${(d.definition || '').slice(0, 100)}${d.definition && d.definition.length > 100 ? '…' : ''}</p><span class="rel-badge" style="color:${nodeColor(d.type)}">${d.type}</span>`;
+  tooltip.style.opacity = '1';
+  moveTooltip(event);
+}
+function moveTooltip(event) {
+  tooltip.style.left = (event.clientX + 16) + 'px';
+  tooltip.style.top  = (event.clientY - 10) + 'px';
+}
+function hideTooltip() { tooltip.style.opacity = '0'; }
+
+// Modal
+function openModal() { document.getElementById('add-modal').classList.add('open'); }
+function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i===0 && tab==='node') || (i===1 && tab==='edge')));
+  document.getElementById('tab-node').classList.toggle('active', tab === 'node');
+  document.getElementById('tab-edge').classList.toggle('active', tab === 'edge');
+}
+
+function addNode() {
+  const id  = document.getElementById('new-node-id').value.trim().replace(/\s+/g, '_');
+  const label = document.getElementById('new-node-label').value.trim();
+  const type  = document.getElementById('new-node-type').value;
+  const def   = document.getElementById('new-node-def').value.trim();
+  if (!id || !label) { alert('ID and Label are required.'); return; }
+  if (graphData.nodes.find(n => n.id === id)) { alert('Node ID already exists.'); return; }
+  graphData.nodes.push({ id, label, type, definition: def });
+  activeNodeTypes.add(type);
+  closeModal();
+  renderGraph();
+}
+
+function addEdge() {
+  const source = document.getElementById('new-edge-source').value.trim();
+  const target = document.getElementById('new-edge-target').value.trim();
+  const relation = document.getElementById('new-edge-rel').value;
+  if (!graphData.nodes.find(n => n.id === source)) { alert(`Source node "${source}" not found.`); return; }
+  if (!graphData.nodes.find(n => n.id === target)) { alert(`Target node "${target}" not found.`); return; }
+  graphData.edges.push({ source, target, relation, label: relation });
+  activeRelTypes.add(relation);
+  closeModal();
+  renderGraph();
+}
+
+function resetView() {
+  const W = document.getElementById('canvas').clientWidth;
+  const H = document.getElementById('canvas').clientHeight;
+  svg.transition().duration(600).call(
+    d3.zoom().transform,
+    d3.zoomIdentity.translate(W / 2, H / 2).scale(1)
+  );
+}
+
+window.addEventListener('resize', () => {
+  const W = document.getElementById('canvas').clientWidth;
+  const H = document.getElementById('canvas').clientHeight;
+  svg.attr('viewBox', [0, 0, W, H]);
+  simulation.force('center', d3.forceCenter(W / 2, H / 2)).alpha(0.3).restart();
+});
+
+init();
+</script>
+</body>
+</html>
