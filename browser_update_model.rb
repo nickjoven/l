@@ -1,12 +1,34 @@
 # Browser Update Knowledge & Lifecycle Model
 #
-# Models two things in the style of canon.d's schema primitives:
-#   1. Knowledge  — what the update infrastructure knows (5 schemas)
-#   2. Lifecycle  — state machine each update traverses
-#
-# Each schema has identity fields (composite "primary key" in CAS terms)
-# and data fields. Identity projection lets topology group machines that
-# are attempting the same upgrade even when they write at different times.
+# Pass LANG=formal to get normal output.
+# Default: brainrot mode (no cap).
+
+BRAINROT = ENV["LANG"] != "formal"
+
+# ─── Language layer ───────────────────────────────────────────────────────────
+
+VOCAB = {
+  formal: {
+    schemas:             "Schemas",
+    lifecycle:           "Lifecycle transitions",
+    topology:            "Topology reads",
+    convergent_clusters: "Convergent clusters",
+    outliers:            "Outliers (not in majority arc)",
+    machine_fmt:         ->(id, from, to) { "  #{id} (#{from} → #{to})" },
+    cluster_fmt:         ->(from, to, n)  { "  #{from} → #{to}: #{n} machine(s)" }
+  },
+  brainrot: {
+    schemas:             "ok so here's the lore on these schemas no cap",
+    lifecycle:           "the pipeline be like (in order fr)",
+    topology:            "what the topology slay reveals bestie",
+    convergent_clusters: "squads that are all on the same grind rn",
+    outliers:            "these machines said 'i do what i want' 💀",
+    machine_fmt:         ->(id, from, to) { "  #{id} said byeee to #{from}, now vibing on #{to}" },
+    cluster_fmt:         ->(from, to, n)  { "  #{from} → #{to}: #{n} devices said 'let's go' together" }
+  }
+}.freeze
+
+def t(key) = VOCAB[BRAINROT ? :brainrot : :formal][key]
 
 # ─── Schemas ─────────────────────────────────────────────────────────────────
 
@@ -19,9 +41,6 @@ SCHEMAS = {
     identity: %i[vendor channel from_version],
     fields:   %i[to_version url signature size_bytes]
   },
-  # Each state-machine transition on one machine is one update_event node.
-  # Identity: (machine_id, from_version, to_version) — uniquely identifies
-  # "this machine attempting this specific upgrade arc."
   update_event: {
     identity: %i[machine_id from_version to_version],
     fields:   %i[event_type status error_code timestamp]
@@ -38,8 +57,6 @@ SCHEMAS = {
 
 # ─── Lifecycle ────────────────────────────────────────────────────────────────
 #
-#  Each arrow is an update_event record (event_type carries the label).
-#
 #  available
 #      │ download_started
 #      ▼
@@ -50,43 +67,40 @@ SCHEMAS = {
 #      │ stage_requested  (gated by rollout_policy.percentage)
 #      ▼
 #  staged
-#      │ apply_started  (triggered on browser restart / idle threshold)
+#      │ apply_started
 #      ▼
 #  applying
 #      │ apply_succeeded
 #      ▼
-#  active ──── crash_loop / regression ──► rollback_initiated
-#                                               │ rollback_completed
-#                                               ▼
-#                                           reverted
+#  active ──── crash_loop ──► rollback_initiated
+#                                  │ rollback_completed
+#                                  ▼
+#                              reverted
 
-TRANSITIONS = %w[
-  download_started
-  download_failed
-  download_verified
-  stage_requested
-  apply_started
-  apply_succeeded
-  rollback_initiated
-  rollback_completed
-].freeze
+TRANSITIONS = {
+  formal: %w[
+    download_started
+    download_failed
+    download_verified
+    stage_requested
+    apply_started
+    apply_succeeded
+    rollback_initiated
+    rollback_completed
+  ],
+  brainrot: %w[
+    bro_started_downloading
+    download_flopped_rip
+    download_goes_hard_verified
+    staging_era_begins
+    applying_fr_fr
+    we_are_so_back
+    rollback_arc_incoming
+    back_to_the_old_me
+  ]
+}.freeze
 
-TERMINAL_STATES = %w[active reverted].freeze
-
-# ─── Topology reads (what canon.d sees across a fleet) ──────────────────────
-#
-# convergent_clusters:
-#   Group update_event nodes by identity projection of (from_version, to_version).
-#   Cluster size ≈ number of machines attempting the same upgrade arc.
-#   Large cluster = broad rollout. Absent clusters = stuck / enterprise-pinned.
-#
-# schema_co_occurrences:
-#   rollout_policy always precedes stage_requested events in lineage chains.
-#   This structural pattern is enforced by the DAG, not convention.
-#
-# outliers:
-#   Machines whose (from_version, to_version) identity doesn't appear in
-#   any convergent cluster — different base version, pinned build, etc.
+# ─── Topology reads ───────────────────────────────────────────────────────────
 
 module TopologyReads
   def self.convergent_clusters(events)
@@ -104,27 +118,29 @@ end
 if __FILE__ == $PROGRAM_NAME
   fleet_events = [
     { machine_id: "m-001", from_version: "123.0", to_version: "124.0",
-      event_type: "download_verified", status: "ok" },
+      event_type: BRAINROT ? "download_goes_hard_verified" : "download_verified", status: "ok" },
     { machine_id: "m-002", from_version: "123.0", to_version: "124.0",
-      event_type: "download_verified", status: "ok" },
+      event_type: BRAINROT ? "download_goes_hard_verified" : "download_verified", status: "ok" },
     { machine_id: "m-003", from_version: "123.0", to_version: "124.0",
-      event_type: "apply_succeeded",   status: "ok" },
-    # outlier: different base version — not in the main cluster
+      event_type: BRAINROT ? "we_are_so_back" : "apply_succeeded", status: "ok" },
     { machine_id: "m-999", from_version: "122.0", to_version: "124.0",
-      event_type: "download_verified", status: "ok" }
+      event_type: BRAINROT ? "download_goes_hard_verified" : "download_verified", status: "ok" }
   ]
 
+  puts t(:schemas)
+  SCHEMAS.each { |name, _| puts "  #{name}" }
+
+  puts "\n#{t(:lifecycle)}"
+  TRANSITIONS[BRAINROT ? :brainrot : :formal].each { |step| puts "  #{step}" }
+
   clusters = TopologyReads.convergent_clusters(fleet_events)
-  puts "Convergent clusters:"
+  puts "\n#{t(:convergent_clusters)}"
   clusters.each do |(from, to), members|
-    puts "  #{from} → #{to}: #{members.size} machine(s)"
+    puts t(:cluster_fmt).call(from, to, members.size)
   end
 
-  puts "\nOutliers (not in majority arc):"
+  puts "\n#{t(:outliers)}"
   TopologyReads.outliers(fleet_events).each do |e|
-    puts "  #{e[:machine_id]} (#{e[:from_version]} → #{e[:to_version]})"
+    puts t(:machine_fmt).call(e[:machine_id], e[:from_version], e[:to_version])
   end
-
-  puts "\nLifecycle transitions:"
-  TRANSITIONS.each { |t| puts "  #{t}" }
 end
