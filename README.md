@@ -2,7 +2,7 @@
 
 A suite of web-deployable, interactable models of the foundational formalisms through which knowledge is represented, organized, and reasoned about.
 
-Open `index.html` in a browser (or serve with any static host) — no backend required.
+Visit [nickjoven.github.io/l](https://nickjoven.github.io/l/) — no backend required.
 
 ---
 
@@ -14,25 +14,6 @@ Open `index.html` in a browser (or serve with any static host) — no backend re
 | **Semantic Network Visualizer** | Typed-Edge Concept Network | Curved typed edges, BFS path finding, domain clustering |
 | **Ontology Browser** | OWL-style Class Hierarchy | Tree + force graph dual view, inherited properties, instances |
 | **Bayesian Belief Network** | Probabilistic Graphical Model | Exact inference, evidence setting, real-time belief propagation |
-
----
-
-## Quick Start
-
-```bash
-# Option 1: open directly
-open index.html
-
-# Option 2: serve locally
-python3 -m http.server 8080
-# then visit http://localhost:8080
-```
-
-## Deploy to GitHub Pages
-
-1. Push to `main` branch
-2. Settings → Pages → Source: root
-3. Access at `https://nickjoven.github.io/l/`
 
 ---
 
