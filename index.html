@@ -10,6 +10,7 @@
     .model-card[data-model="sn"]    { --card-accent: var(--sn-color);    }
     .model-card[data-model="onto"]  { --card-accent: var(--onto-color);  }
     .model-card[data-model="bayes"] { --card-accent: var(--bayes-color); }
+    .model-card[data-model="iso"]   { --card-accent: #39d0d8; }
 
     .model-card:hover { border-color: var(--card-accent); }
     .model-card .launch-btn { background: var(--card-accent); }
@@ -238,6 +239,73 @@
           and watch posterior probabilities propagate in real time.
         </p>
         <a class="launch-btn" href="models/bayesian-network.html">Launch Network →</a>
+      </div>
+    </div>
+
+    <!-- Structure Isomorphism Explorer -->
+    <div class="model-card" data-model="iso">
+      <div class="model-card-preview" style="background:#0d1117">
+        <svg class="preview-svg" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+          <!-- Panel A (left) -->
+          <rect x="8" y="8" width="82" height="144" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+          <text x="49" y="22" text-anchor="middle" fill="#8b949e" font-size="5.5" font-family="sans-serif">EPISTEMIC</text>
+          <line x1="30" y1="50" x2="49" y2="80" stroke="#58a6ff" stroke-width="1.2" opacity="0.6"/>
+          <line x1="68" y1="50" x2="49" y2="80" stroke="#56d364" stroke-width="1.2" opacity="0.6"/>
+          <line x1="49" y1="80" x2="49" y2="118" stroke="#d2a8ff" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="30" cy="48" r="10" fill="#58a6ff" opacity="0.85" style="animation:float 2.5s ease-in-out infinite"/>
+          <circle cx="68" cy="48" r="10" fill="#56d364" opacity="0.85" style="animation:float 3.1s ease-in-out infinite"/>
+          <circle cx="49" cy="82" r="10" fill="#d2a8ff" opacity="0.85" style="animation:float 2.8s ease-in-out infinite"/>
+          <circle cx="49" cy="120" r="10" fill="#f0a500" opacity="0.85" style="animation:float 3.3s ease-in-out infinite"/>
+          <text x="30" y="48"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Percep.</text>
+          <text x="68" y="48"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Testim.</text>
+          <text x="49" y="82"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Justif.</text>
+          <text x="49" y="120" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Know.</text>
+          <!-- Panel B (center) -->
+          <rect x="99" y="8" width="82" height="144" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+          <text x="140" y="22" text-anchor="middle" fill="#8b949e" font-size="5.5" font-family="sans-serif">BIOLOGICAL</text>
+          <line x1="121" y1="50" x2="140" y2="80" stroke="#58a6ff" stroke-width="1.2" opacity="0.6"/>
+          <line x1="159" y1="50" x2="140" y2="80" stroke="#56d364" stroke-width="1.2" opacity="0.6"/>
+          <line x1="140" y1="80" x2="140" y2="118" stroke="#d2a8ff" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="121" cy="48" r="10" fill="#58a6ff" opacity="0.85" style="animation:float 2.7s ease-in-out infinite"/>
+          <circle cx="159" cy="48" r="10" fill="#56d364" opacity="0.85" style="animation:float 2.9s ease-in-out infinite"/>
+          <circle cx="140" cy="82" r="10" fill="#d2a8ff" opacity="0.85" style="animation:float 3.2s ease-in-out infinite"/>
+          <circle cx="140" cy="120" r="10" fill="#f0a500" opacity="0.85" style="animation:float 2.4s ease-in-out infinite"/>
+          <text x="121" y="48"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Genot.</text>
+          <text x="159" y="48"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Envir.</text>
+          <text x="140" y="82"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Adapt.</text>
+          <text x="140" y="120" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Fitness</text>
+          <!-- Panel C (right) -->
+          <rect x="190" y="8" width="82" height="144" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+          <text x="231" y="22" text-anchor="middle" fill="#8b949e" font-size="5.5" font-family="sans-serif">LEGAL</text>
+          <line x1="212" y1="50" x2="231" y2="80" stroke="#58a6ff" stroke-width="1.2" opacity="0.6"/>
+          <line x1="250" y1="50" x2="231" y2="80" stroke="#56d364" stroke-width="1.2" opacity="0.6"/>
+          <line x1="231" y1="80" x2="231" y2="118" stroke="#d2a8ff" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="212" cy="48" r="10" fill="#58a6ff" opacity="0.85" style="animation:float 3.0s ease-in-out infinite"/>
+          <circle cx="250" cy="48" r="10" fill="#56d364" opacity="0.85" style="animation:float 2.6s ease-in-out infinite"/>
+          <circle cx="231" cy="82" r="10" fill="#d2a8ff" opacity="0.85" style="animation:float 3.4s ease-in-out infinite"/>
+          <circle cx="231" cy="120" r="10" fill="#f0a500" opacity="0.85" style="animation:float 2.3s ease-in-out infinite"/>
+          <text x="212" y="48"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Alleg.</text>
+          <text x="250" y="48"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Preced.</text>
+          <text x="231" y="82"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Argum.</text>
+          <text x="231" y="120" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5" font-family="sans-serif">Verdict</text>
+        </svg>
+      </div>
+      <div class="model-card-body">
+        <div class="formalism">Graph Isomorphism / Vocabulary Mapping</div>
+        <h2>Structure Isomorphism Explorer</h2>
+        <div class="tag-list">
+          <span class="tag">Small multiples</span>
+          <span class="tag">Cross-panel hover</span>
+          <span class="tag">5 vocabularies</span>
+          <span class="tag">3 templates</span>
+        </div>
+        <p>
+          The same graph topology rendered simultaneously across five domain
+          vocabularies — epistemic, biological, social, computational, legal.
+          Hover any node to highlight its structural counterpart in every panel,
+          making isomorphism visible rather than abstract.
+        </p>
+        <a class="launch-btn" href="models/iso-explorer.html">Launch Explorer →</a>
       </div>
     </div>
 

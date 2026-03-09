@@ -1,0 +1,164 @@
+{
+  "templates": [
+    {
+      "id": "chain",
+      "name": "Justification Chain",
+      "description": "Two independent sources converge on a mediating structure, which produces a grounded conclusion.",
+      "nodes": [
+        { "role": "source-a",   "color": "#58a6ff" },
+        { "role": "source-b",   "color": "#56d364" },
+        { "role": "mediator",   "color": "#d2a8ff" },
+        { "role": "conclusion", "color": "#f0a500" }
+      ],
+      "edges": [
+        { "source": "source-a", "target": "mediator",   "relation": "supports" },
+        { "source": "source-b", "target": "mediator",   "relation": "supports" },
+        { "source": "mediator", "target": "conclusion", "relation": "enables"  }
+      ]
+    },
+    {
+      "id": "loop",
+      "name": "Feedback Loop",
+      "description": "A cyclic structure where a process output feeds back to reinforce or inhibit its own trigger.",
+      "nodes": [
+        { "role": "trigger",     "color": "#f78166" },
+        { "role": "process",     "color": "#39d0d8" },
+        { "role": "output",      "color": "#e8c77a" },
+        { "role": "consequence", "color": "#d2a8ff" }
+      ],
+      "edges": [
+        { "source": "trigger",     "target": "process",     "relation": "causes"      },
+        { "source": "process",     "target": "output",      "relation": "produces"    },
+        { "source": "output",      "target": "consequence", "relation": "leads-to"    },
+        { "source": "consequence", "target": "trigger",     "relation": "reinforces"  }
+      ]
+    },
+    {
+      "id": "hierarchy",
+      "name": "Hierarchical Decomposition",
+      "description": "A root concept partitions into categories, each containing specific instances or subtypes.",
+      "nodes": [
+        { "role": "root",        "color": "#d2a8ff" },
+        { "role": "category-a",  "color": "#58a6ff" },
+        { "role": "category-b",  "color": "#56d364" },
+        { "role": "instance-a1", "color": "#9ecfff" },
+        { "role": "instance-a2", "color": "#9ecfff" },
+        { "role": "instance-b1", "color": "#7ee8a2" }
+      ],
+      "edges": [
+        { "source": "root",       "target": "category-a",  "relation": "contains" },
+        { "source": "root",       "target": "category-b",  "relation": "contains" },
+        { "source": "category-a", "target": "instance-a1", "relation": "includes" },
+        { "source": "category-a", "target": "instance-a2", "relation": "includes" },
+        { "source": "category-b", "target": "instance-b1", "relation": "includes" }
+      ]
+    }
+  ],
+  "vocabularies": [
+    {
+      "id": "epistemic",
+      "name": "Epistemic",
+      "color": "#d2a8ff",
+      "roles": {
+        "source-a":    { "label": "Perception",    "desc": "Direct sensory evidence" },
+        "source-b":    { "label": "Testimony",     "desc": "Reported by another agent" },
+        "mediator":    { "label": "Justification", "desc": "The warranting structure" },
+        "conclusion":  { "label": "Knowledge",     "desc": "Justified true belief" },
+        "trigger":     { "label": "Doubt",         "desc": "Suspension of assent" },
+        "process":     { "label": "Inquiry",       "desc": "Active investigation" },
+        "output":      { "label": "Belief",        "desc": "Propositional attitude" },
+        "consequence": { "label": "Revision",      "desc": "Updating prior beliefs" },
+        "root":        { "label": "Mind",          "desc": "The epistemic agent" },
+        "category-a":  { "label": "Propositional", "desc": "Linguistic knowledge content" },
+        "category-b":  { "label": "Procedural",    "desc": "Knowledge how" },
+        "instance-a1": { "label": "Axiom",         "desc": "Self-evident truth" },
+        "instance-a2": { "label": "Inference",     "desc": "Derived proposition" },
+        "instance-b1": { "label": "Skill",         "desc": "Embodied competence" }
+      }
+    },
+    {
+      "id": "biological",
+      "name": "Biological",
+      "color": "#56d364",
+      "roles": {
+        "source-a":    { "label": "Genotype",      "desc": "Inherited genetic code" },
+        "source-b":    { "label": "Environment",   "desc": "Selective pressures" },
+        "mediator":    { "label": "Adaptation",    "desc": "Trait under selection" },
+        "conclusion":  { "label": "Fitness",       "desc": "Reproductive success" },
+        "trigger":     { "label": "Stimulus",      "desc": "Environmental signal" },
+        "process":     { "label": "Response",      "desc": "Physiological reaction" },
+        "output":      { "label": "Phenotype",     "desc": "Expressed characteristic" },
+        "consequence": { "label": "Selection",     "desc": "Differential survival" },
+        "root":        { "label": "Organism",      "desc": "The biological agent" },
+        "category-a":  { "label": "Morphology",    "desc": "Structural traits" },
+        "category-b":  { "label": "Behavior",      "desc": "Functional traits" },
+        "instance-a1": { "label": "Organ",         "desc": "Specialized structure" },
+        "instance-a2": { "label": "Tissue",        "desc": "Cellular assembly" },
+        "instance-b1": { "label": "Reflex",        "desc": "Automatic response" }
+      }
+    },
+    {
+      "id": "social",
+      "name": "Social",
+      "color": "#f0a500",
+      "roles": {
+        "source-a":    { "label": "Rumor",         "desc": "Unverified claim" },
+        "source-b":    { "label": "Authority",     "desc": "Institutional source" },
+        "mediator":    { "label": "Discourse",     "desc": "Public deliberation" },
+        "conclusion":  { "label": "Norm",          "desc": "Shared expectation" },
+        "trigger":     { "label": "Grievance",     "desc": "Perceived injustice" },
+        "process":     { "label": "Mobilization",  "desc": "Collective action" },
+        "output":      { "label": "Movement",      "desc": "Organized resistance" },
+        "consequence": { "label": "Reform",        "desc": "Institutional change" },
+        "root":        { "label": "Society",       "desc": "The social whole" },
+        "category-a":  { "label": "Institutions",  "desc": "Formal structures" },
+        "category-b":  { "label": "Practices",     "desc": "Informal customs" },
+        "instance-a1": { "label": "Law",           "desc": "Codified rule" },
+        "instance-a2": { "label": "Market",        "desc": "Exchange system" },
+        "instance-b1": { "label": "Ritual",        "desc": "Repeated ceremony" }
+      }
+    },
+    {
+      "id": "computational",
+      "name": "Computational",
+      "color": "#39d0d8",
+      "roles": {
+        "source-a":    { "label": "Input A",       "desc": "First data stream" },
+        "source-b":    { "label": "Input B",       "desc": "Second data stream" },
+        "mediator":    { "label": "Transform",     "desc": "Processing function" },
+        "conclusion":  { "label": "Output",        "desc": "Computed result" },
+        "trigger":     { "label": "Event",         "desc": "System signal" },
+        "process":     { "label": "Handler",       "desc": "Event processor" },
+        "output":      { "label": "State",         "desc": "System configuration" },
+        "consequence": { "label": "Side-effect",   "desc": "External change" },
+        "root":        { "label": "System",        "desc": "The program" },
+        "category-a":  { "label": "Data",          "desc": "Stored values" },
+        "category-b":  { "label": "Logic",         "desc": "Control flow" },
+        "instance-a1": { "label": "Array",         "desc": "Ordered collection" },
+        "instance-a2": { "label": "Record",        "desc": "Key-value map" },
+        "instance-b1": { "label": "Condition",     "desc": "Branch predicate" }
+      }
+    },
+    {
+      "id": "legal",
+      "name": "Legal",
+      "color": "#f78166",
+      "roles": {
+        "source-a":    { "label": "Allegation",    "desc": "Claimed fact" },
+        "source-b":    { "label": "Precedent",     "desc": "Prior ruling" },
+        "mediator":    { "label": "Argument",      "desc": "Legal reasoning" },
+        "conclusion":  { "label": "Verdict",       "desc": "Binding decision" },
+        "trigger":     { "label": "Dispute",       "desc": "Contested claim" },
+        "process":     { "label": "Proceeding",    "desc": "Formal hearing" },
+        "output":      { "label": "Ruling",        "desc": "Judicial finding" },
+        "consequence": { "label": "Appeal",        "desc": "Challenge to ruling" },
+        "root":        { "label": "Legal Code",    "desc": "The body of law" },
+        "category-a":  { "label": "Statute",       "desc": "Written law" },
+        "category-b":  { "label": "Common Law",    "desc": "Case-based law" },
+        "instance-a1": { "label": "Provision",     "desc": "Specific clause" },
+        "instance-a2": { "label": "Amendment",     "desc": "Modification" },
+        "instance-b1": { "label": "Doctrine",      "desc": "Established principle" }
+      }
+    }
+  ]
+}

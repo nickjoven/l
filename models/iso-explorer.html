@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Structure Isomorphism Explorer — Epistemic Knowledge Substrate</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .iso-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .iso-header {
+      padding: 22px 32px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .back-link {
+      display: inline-block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .back-link:hover { color: var(--text); text-decoration: none; }
+    .iso-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .iso-header p {
+      color: var(--text-muted);
+      font-size: 13px;
+      max-width: 640px;
+    }
+
+    /* ── Template tabs ── */
+    .template-tabs {
+      display: flex;
+      gap: 4px;
+      margin-top: 16px;
+    }
+    .tmpl-tab {
+      padding: 5px 15px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tmpl-tab:hover { color: var(--text); border-color: var(--text-muted); }
+    .tmpl-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Description bar ── */
+    .tmpl-desc {
+      padding: 9px 32px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .tmpl-desc-label {
+      color: var(--text);
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    /* ── Main ── */
+    .iso-main {
+      flex: 1;
+      padding: 28px 24px 32px;
+      overflow-y: auto;
+    }
+
+    /* ── Small multiples grid ── */
+    .multiples-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+    @media (max-width: 880px) { .multiples-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .multiples-grid { grid-template-columns: 1fr; } }
+
+    /* ── Individual panel ── */
+    .vocab-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .vocab-panel:hover { border-color: var(--text-muted); }
+
+    .vocab-panel-header {
+      padding: 7px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .vocab-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .vocab-name {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .vocab-panel-graph {
+      display: block;
+      width: 100%;
+    }
+
+    /* ── Hover states (applied via JS classList) ── */
+    .node-group circle,
+    .node-group text { transition: opacity 0.12s; }
+
+    .node-group.dimmed circle { opacity: 0.08; }
+    .node-group.dimmed text   { opacity: 0.06; }
+
+    .node-group.highlighted circle {
+      stroke: rgba(255,255,255,0.9) !important;
+      stroke-width: 2.5px !important;
+    }
+
+    .edge-group { transition: opacity 0.12s; }
+    .edge-group.dimmed { opacity: 0.06; }
+
+    /* ── Tooltip ── */
+    #iso-tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 12px;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.1s;
+      max-width: 230px;
+      line-height: 1.45;
+    }
+    #iso-tooltip.visible { opacity: 1; }
+    .tt-role  { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+    .tt-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .tt-desc  { font-size: 11px; color: var(--text-muted); }
+    .tt-sep   { margin: 8px 0; border: none; border-top: 1px solid var(--border); }
+    .tt-also  { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .tt-match-row { display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 11px; }
+    .tt-match-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Role legend ── */
+    .role-legend {
+      max-width: 1060px;
+      margin: 20px auto 0;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .role-legend-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .role-legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .role-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .role-item-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .iso-footer {
+      text-align: center;
+      padding: 14px;
+      color: var(--text-muted);
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="iso-layout">
+
+  <div class="iso-header">
+    <a class="back-link" href="../index.html">← Back to hub</a>
+    <h1>Structure Isomorphism Explorer</h1>
+    <p>The same graph topology rendered across five domain vocabularies. Hover any node to highlight its structural counterpart in every panel simultaneously — same structure, different words.</p>
+    <div class="template-tabs" id="template-tabs"></div>
+  </div>
+
+  <div class="tmpl-desc">
+    <span class="tmpl-desc-label" id="tmpl-desc-name"></span>
+    <span id="tmpl-desc-text"></span>
+  </div>
+
+  <div class="iso-main">
+    <div class="multiples-grid" id="multiples-grid"></div>
+    <div class="role-legend" id="role-legend">
+      <div class="role-legend-title">Structural roles — node color is invariant across all panels</div>
+      <div class="role-legend-items" id="role-legend-items"></div>
+    </div>
+  </div>
+
+  <div class="iso-footer">Epistemic Knowledge Substrate &mdash; Structure Isomorphism Explorer</div>
+</div>
+
+<div id="iso-tooltip"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+(async () => {
+  const data = await fetch('../data/iso-explorer.json').then(r => r.json());
+  const { templates, vocabularies } = data;
+
+  // ── Tooltip ────────────────────────────────────────────────────
+  const ttEl = document.getElementById('iso-tooltip');
+
+  function showTooltip(role, vocabId, cx, cy) {
+    const vocab = vocabularies.find(v => v.id === vocabId);
+    const ri = vocab.roles[role] || { label: role, desc: '' };
+
+    const matchRows = vocabularies
+      .filter(v => v.id !== vocabId)
+      .map(v => {
+        const vri = v.roles[role] || { label: role };
+        return `<div class="tt-match-row">
+          <div class="tt-match-dot" style="background:${v.color}"></div>
+          <span style="color:var(--text-muted)">${v.name}:</span>&nbsp;<span style="color:var(--text)">${vri.label}</span>
+        </div>`;
+      }).join('');
+
+    ttEl.innerHTML = `
+      <div class="tt-role">${role.replace(/-/g, '\u00a0')}</div>
+      <div class="tt-label">${ri.label}</div>
+      <div class="tt-desc">${ri.desc}</div>
+      <hr class="tt-sep">
+      <div class="tt-also">Same role elsewhere:</div>
+      ${matchRows}`;
+
+    const left = Math.min(cx + 18, window.innerWidth - 248);
+    const top  = Math.max(8, Math.min(cy - 12, window.innerHeight - 280));
+    ttEl.style.left = left + 'px';
+    ttEl.style.top  = top + 'px';
+    ttEl.classList.add('visible');
+  }
+
+  function hideTooltip() { ttEl.classList.remove('visible'); }
+
+  // ── Cross-panel hover sync ─────────────────────────────────────
+  function syncHover(role) {
+    document.querySelectorAll('.node-group').forEach(el => {
+      if (!role) {
+        el.classList.remove('highlighted', 'dimmed');
+      } else if (el.dataset.role === role) {
+        el.classList.add('highlighted');
+        el.classList.remove('dimmed');
+      } else {
+        el.classList.add('dimmed');
+        el.classList.remove('highlighted');
+      }
+    });
+    document.querySelectorAll('.edge-group').forEach(el => {
+      el.classList.toggle('dimmed', !!role);
+    });
+  }
+
+  // ── Force layout (shared across all panels for a given template) ──
+  function computeLayout(template, W, H) {
+    const nodes = template.nodes.map(n => ({ ...n, id: n.role }));
+    const links = template.edges.map(e => ({ ...e }));
+
+    const sim = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(d => d.id).distance(82).strength(1))
+      .force('charge', d3.forceManyBody().strength(-240))
+      .force('center', d3.forceCenter(W / 2, H / 2))
+      .force('collision', d3.forceCollide(30))
+      .stop();
+
+    for (let i = 0; i < 400; i++) sim.tick();
+
+    // Clamp to viewBox
+    const pad = 32;
+    nodes.forEach(n => {
+      n.x = Math.max(pad, Math.min(W - pad, n.x));
+      n.y = Math.max(pad, Math.min(H - pad, n.y));
+    });
+
+    return { nodes, links };
+  }
+
+  // ── Build one panel SVG ────────────────────────────────────────
+  function buildPanel(vocab, template, nodes, links) {
+    const W = 280, H = 214, R = 17;
+
+    const svg = d3.create('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('class', 'vocab-panel-graph')
+      .style('background', 'var(--bg)');
+
+    const defs = svg.append('defs');
+    // Arrowhead per source-node color
+    const seenColors = new Set();
+    nodes.forEach(n => {
+      if (seenColors.has(n.color)) return;
+      seenColors.add(n.color);
+      const mid = `arr-${vocab.id}-${n.color.slice(1)}`;
+      defs.append('marker')
+        .attr('id', mid)
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 22).attr('refY', 0)
+        .attr('markerWidth', 5).attr('markerHeight', 5)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', n.color)
+        .attr('opacity', 0.75);
+    });
+
+    const nodeById = new Map(nodes.map(n => [n.id, n]));
+
+    // Edges first (below nodes)
+    links.forEach(link => {
+      const sid = typeof link.source === 'object' ? link.source.id : link.source;
+      const tid = typeof link.target === 'object' ? link.target.id : link.target;
+      const s = nodeById.get(sid);
+      const t = nodeById.get(tid);
+      if (!s || !t) return;
+
+      const dx = t.x - s.x, dy = t.y - s.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const nx = dx / dist, ny = dy / dist;
+
+      const arrId = `arr-${vocab.id}-${s.color.slice(1)}`;
+
+      svg.append('g')
+        .attr('class', 'edge-group')
+        .append('line')
+        .attr('x1', s.x + nx * R).attr('y1', s.y + ny * R)
+        .attr('x2', t.x - nx * (R + 4)).attr('y2', t.y - ny * (R + 4))
+        .attr('stroke', s.color)
+        .attr('stroke-width', 1.5)
+        .attr('opacity', 0.5)
+        .attr('marker-end', `url(#${arrId})`);
+    });
+
+    // Nodes
+    nodes.forEach(n => {
+      const vri = vocab.roles[n.role] || { label: n.role, desc: '' };
+      const label = vri.label.length > 9 ? vri.label.slice(0, 8) + '\u2026' : vri.label;
+
+      const g = svg.append('g')
+        .attr('class', 'node-group')
+        .attr('data-role', n.role)
+        .attr('transform', `translate(${n.x},${n.y})`)
+        .style('cursor', 'pointer');
+
+      g.append('circle')
+        .attr('r', R)
+        .attr('fill', n.color)
+        .attr('fill-opacity', 0.82)
+        .attr('stroke', 'rgba(255,255,255,0.12)')
+        .attr('stroke-width', 1.5);
+
+      g.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('fill', '#fff')
+        .attr('font-size', 8)
+        .attr('font-family', '-apple-system, BlinkMacSystemFont, sans-serif')
+        .attr('pointer-events', 'none')
+        .text(label);
+
+      g.on('mouseover', (event) => {
+        syncHover(n.role);
+        showTooltip(n.role, vocab.id, event.clientX, event.clientY);
+      });
+      g.on('mousemove', (event) => {
+        showTooltip(n.role, vocab.id, event.clientX, event.clientY);
+      });
+      g.on('mouseout', () => {
+        syncHover(null);
+        hideTooltip();
+      });
+    });
+
+    return svg.node();
+  }
+
+  // ── Render a template ──────────────────────────────────────────
+  function renderTemplate(template) {
+    document.getElementById('tmpl-desc-name').textContent = template.name;
+    document.getElementById('tmpl-desc-text').textContent = template.description;
+
+    document.querySelectorAll('.tmpl-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tid === template.id);
+    });
+
+    const W = 280, H = 214;
+    const { nodes, links } = computeLayout(template, W, H);
+
+    const grid = document.getElementById('multiples-grid');
+    grid.innerHTML = '';
+
+    vocabularies.forEach(vocab => {
+      const panel = document.createElement('div');
+      panel.className = 'vocab-panel';
+
+      const header = document.createElement('div');
+      header.className = 'vocab-panel-header';
+      header.innerHTML = `
+        <div class="vocab-dot" style="background:${vocab.color}"></div>
+        <span class="vocab-name" style="color:${vocab.color}">${vocab.name}</span>`;
+
+      panel.appendChild(header);
+      panel.appendChild(buildPanel(vocab, template, nodes, links));
+      grid.appendChild(panel);
+    });
+
+    // Role legend
+    const items = document.getElementById('role-legend-items');
+    items.innerHTML = '';
+    template.nodes.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'role-item';
+      item.innerHTML = `
+        <div class="role-item-dot" style="background:${n.color}"></div>
+        <span>${n.role.replace(/-/g, '\u00a0')}</span>`;
+      items.appendChild(item);
+    });
+  }
+
+  // ── Template tabs ──────────────────────────────────────────────
+  const tabsEl = document.getElementById('template-tabs');
+  templates.forEach(tmpl => {
+    const btn = document.createElement('button');
+    btn.className = 'tmpl-tab';
+    btn.dataset.tid = tmpl.id;
+    btn.textContent = tmpl.name;
+    btn.addEventListener('click', () => renderTemplate(tmpl));
+    tabsEl.appendChild(btn);
+  });
+
+  renderTemplate(templates[0]);
+})();
+</script>
+</body>
+</html>
