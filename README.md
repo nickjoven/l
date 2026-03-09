@@ -1,3 +1,3 @@
-# Epistemic Knowledge Substrate
+# no thoughts head full (a brain rot taxonomy)
 
-[Paper](https://github.com/nickjoven/jfk-dsa/blob/main/joven_knowledge_substrate.md) | [Demo](https://nickjoven.github.io/l/)
+[lore](https://github.com/nickjoven/jfk-dsa/blob/main/joven_knowledge_substrate.md) | [the thing itself](https://nickjoven.github.io/l/)
