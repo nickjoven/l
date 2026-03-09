@@ -10,7 +10,8 @@
     .model-card[data-model="sn"]    { --card-accent: var(--sn-color);    }
     .model-card[data-model="onto"]  { --card-accent: var(--onto-color);  }
     .model-card[data-model="bayes"] { --card-accent: var(--bayes-color); }
-    .model-card[data-model="iso"]   { --card-accent: #39d0d8; }
+    .model-card[data-model="iso"]        { --card-accent: #39d0d8; }
+    .model-card[data-model="retrieval"] { --card-accent: #e8c77a; }
 
     .model-card:hover { border-color: var(--card-accent); }
     .model-card .launch-btn { background: var(--card-accent); }
@@ -306,6 +307,70 @@
           making isomorphism visible rather than abstract.
         </p>
         <a class="launch-btn" href="models/iso-explorer.html">Launch Explorer →</a>
+      </div>
+    </div>
+
+    <!-- RAG vs Subgraph Retrieval -->
+    <div class="model-card" data-model="retrieval">
+      <div class="model-card-preview" style="background:#0d1117">
+        <svg class="preview-svg" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+          <!-- Left: RAG chunks -->
+          <rect x="10" y="16" width="118" height="128" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+          <text x="69" y="28" text-anchor="middle" fill="#8b949e" font-size="5.5" font-family="sans-serif">RAG CHUNKS</text>
+          <rect x="18" y="36" width="102" height="22" rx="3" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+          <text x="24" y="44" fill="#f78166" font-size="5" font-family="monospace">sim: 0.91</text>
+          <rect x="54" y="42" width="60" height="2.5" rx="1" fill="#21262d"/>
+          <rect x="54" y="42" width="55" height="2.5" rx="1" fill="#f78166" opacity="0.7"/>
+          <text x="24" y="53" fill="#8b949e" font-size="4.5">...justified <tspan fill="#c9d1d9">true belief</tspan> is...</text>
+          <rect x="18" y="63" width="102" height="22" rx="3" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+          <text x="24" y="71" fill="#f78166" font-size="5" font-family="monospace">sim: 0.77</text>
+          <rect x="54" y="69" width="60" height="2.5" rx="1" fill="#21262d"/>
+          <rect x="54" y="69" width="46" height="2.5" rx="1" fill="#f78166" opacity="0.7"/>
+          <text x="24" y="80" fill="#8b949e" font-size="4.5">...<tspan fill="#c9d1d9">knowledge</tspan> requires...</text>
+          <rect x="18" y="90" width="102" height="22" rx="3" fill="#21262d" stroke="#30363d" stroke-width="0.5"/>
+          <text x="24" y="98" fill="#f78166" font-size="5" font-family="monospace">sim: 0.62</text>
+          <rect x="54" y="96" width="60" height="2.5" rx="1" fill="#21262d"/>
+          <rect x="54" y="96" width="37" height="2.5" rx="1" fill="#f78166" opacity="0.7"/>
+          <text x="24" y="107" fill="#8b949e" font-size="4.5">...<tspan fill="#c9d1d9">virtue</tspan> epistemology...</text>
+          <text x="69" y="133" text-anchor="middle" fill="#f78166" font-size="5.5" font-family="monospace" font-weight="700">487 tokens</text>
+          <!-- Right: Subgraph -->
+          <rect x="152" y="16" width="118" height="128" rx="5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+          <text x="211" y="28" text-anchor="middle" fill="#8b949e" font-size="5.5" font-family="sans-serif">SUBGRAPH</text>
+          <line x1="211" y1="62" x2="178" y2="90"  stroke="#58a6ff" stroke-width="1" opacity="0.6"/>
+          <line x1="211" y1="62" x2="244" y2="90"  stroke="#56d364" stroke-width="1" opacity="0.6"/>
+          <line x1="178" y1="90" x2="211" y2="118" stroke="#39d0d8" stroke-width="1" opacity="0.6"/>
+          <line x1="244" y1="90" x2="211" y2="118" stroke="#39d0d8" stroke-width="1" opacity="0.6"/>
+          <circle cx="211" cy="60"  r="14" fill="#f0a500" opacity="0.9" style="animation:float 2.5s ease-in-out infinite"/>
+          <circle cx="178" cy="90"  r="11" fill="#56d364" opacity="0.9" style="animation:float 3.1s ease-in-out infinite"/>
+          <circle cx="244" cy="90"  r="11" fill="#d2a8ff" opacity="0.9" style="animation:float 2.8s ease-in-out infinite"/>
+          <circle cx="211" cy="118" r="14" fill="#58a6ff" opacity="0.9" style="animation:float 3.3s ease-in-out infinite"/>
+          <text x="211" y="57"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5.5" font-weight="700">Justif.</text>
+          <text x="211" y="65"  text-anchor="middle" dominant-baseline="middle" fill="#e8c77a" font-size="4" font-family="monospace">a3f7c2</text>
+          <text x="178" y="88"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5">Belief</text>
+          <text x="178" y="96"  text-anchor="middle" dominant-baseline="middle" fill="#e8c77a" font-size="4" font-family="monospace">d5a310</text>
+          <text x="244" y="88"  text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5">Truth</text>
+          <text x="244" y="96"  text-anchor="middle" dominant-baseline="middle" fill="#e8c77a" font-size="4" font-family="monospace">e77b33</text>
+          <text x="211" y="115" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="5.5" font-weight="700">Know.</text>
+          <text x="211" y="123" text-anchor="middle" dominant-baseline="middle" fill="#e8c77a" font-size="4" font-family="monospace">c88f04</text>
+          <text x="211" y="133" text-anchor="middle" fill="#56d364" font-size="5.5" font-family="monospace" font-weight="700">58 tokens</text>
+        </svg>
+      </div>
+      <div class="model-card-body">
+        <div class="formalism">Retrieval Strategy Comparison</div>
+        <h2>RAG Chunks vs. Subgraph Retrieval</h2>
+        <div class="tag-list">
+          <span class="tag">Token efficiency</span>
+          <span class="tag">Hash reasoning</span>
+          <span class="tag">Animated retrieval</span>
+          <span class="tag">3 queries</span>
+        </div>
+        <p>
+          The same knowledge expressed two ways: flat text chunks retrieved by cosine
+          similarity vs. typed subgraphs retrieved by hash lookup. Compare token costs,
+          relation fidelity, and why an agent reasons more reliably when given a hash
+          than a paragraph.
+        </p>
+        <a class="launch-btn" href="models/retrieval-compare.html">Launch Comparison →</a>
       </div>
     </div>
 
